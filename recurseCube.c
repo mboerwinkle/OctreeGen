@@ -9,7 +9,8 @@ void getCorner(int idx, int x1, int y1, int z1, int x2, int y2, int z2, int* wri
 int cubeExists(model* target, oct* currentCube);
 
 
-oct* newOct = NULL;//this is freed by generateOctree
+//oct* newOct = NULL;//this is freed by generateOctree
+extern oct* newOct;
 int recurseCube(model* target, oct* currentCube){//returns 1 if full, or 0 if incomplete 
 /*	int c[3];//corner and shallowCorner combined describe all possible positions for the child corners. Every dimension of shallowCorner is greater than corner.
 	memcpy(c, currentCube->corner, 3*sizeof(int));

@@ -9,5 +9,5 @@ extern int cornerExists(oct* t, int x, int y, int z);
 extern void addCorner(oct* t, int x, int y, int z);
 extern void getCubeCorner(int idx, oct* parent, oct* target);
 extern int identifyCorner(oct* t, int x, int y, int z);
-extern void addTriangle(oct* t, facet* tri, double scale);
+extern void addTriangle(oct* t, facet* tri, double res);
 #endif
