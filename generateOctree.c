@@ -58,16 +58,16 @@ model generateOctree(model target){//based on cubealgo.txt
 		target.myTree->corner[dim] = -sideLength/2;
 	}
 	printf("corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
-	if(cubeExists(&target, target.myTree)){
+	for(int tIdx = 0; tIdx < target.facetCount; tIdx++){
+		addTriangle(target.myTree, &(target.facets[tIdx]), 1/resolution);
+	}
+	/*if(cubeExists(&target, target.myTree)){
 		recurseCube(&target, target.myTree);
 		free(newOct);
 	}else{
 		free(target.myTree);
 		target.myTree = NULL;
-	}
+	}*/
 	puts("Done finding border");
-	//fill exterior
-	//fill interior
-	//create octree
 	return target;
 }
