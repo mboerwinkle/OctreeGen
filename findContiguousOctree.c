@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "octreeOps.h"
 //FIXME better implementation has a balanced binary tree of locations that is also an array. fRef keeps track of array index of frontier queue locations. using an octree for this application is inefficient since both fRef and the octree store location data for the frontier
+//FIXME better implementation can take advantage of full sectors.
 //FIXME make non-recursive versions of popular octree functions to see which is faster
 typedef struct fRef{
 	int l[3];
