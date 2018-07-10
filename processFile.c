@@ -59,15 +59,12 @@ void writeOutput(FILE* output, model target){
 }
 void writeCubeOutput(FILE* output, oct* tree, int dummy){
 	if(tree->full == 1){
-		//if(tree->mag != 0)printf("we have a 'full' of mag %d\n", tree->mag);
 		double center[3] = {resolution*tree->corner[0], resolution*tree->corner[1], resolution*tree->corner[2]};
 		for(int dim = 0; dim < 3; dim++){
 			center[dim]+= resolution*(1<<(tree->mag))*0.5;//FIXME code dupe
 		}
 		double sideLen = resolution*(1<<(tree->mag));
-	//	printf("center %lf %lf %lf\n", center[0], center[1], center[2]);
 		facet cube[12];
-		//facet* cube = calloc(12, sizeof(facet));
 		createCubeTriangles(center, sideLen, cube);
 		if(!dummy) fwrite(cube, sizeof(facet), 12, output);
 		triangleWriteCount+=12;
@@ -77,4 +74,7 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 			writeCubeOutput(output, tree->child[cIdx], dummy);
 		}
 	}
+}
+void exposedFaces(oct* tree, int* corner, int mag, int* xp, int* xn, int* yp, int* yn, int* zp, int* zn){
+	
 }
