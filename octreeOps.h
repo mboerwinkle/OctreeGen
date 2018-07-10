@@ -19,6 +19,7 @@ extern void getCubeCorner(int idx, oct* parent, oct* target);
 extern int identifyCorner(oct* t, int x, int y, int z);
 //adds all of the lowest level voxels that intersect the given facet to the octree
 extern void addTriangle(oct* t, facet* tri, double res);
-//determines which of the faces of the specified cube are open to the air
-extern void exposedFaces(oct* tree, int* corner, int mag, int* xp, int* xn, int* yp, int* yn, int* zp, int* zn);
+//determines which of the faces of the specified cube are open to the air. returns the number of exposed faces
+extern int exposedFaces(oct* tree, int* corner, int mag, int* faces);
+
 #endif

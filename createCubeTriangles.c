@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "structures.h"
 void createCubeTriangles(double* center, double sideLen, facet* facetArray){//FIXME use integer offsets to avoid fp problems on large models (Do after octree working conversion)
+	//creation order is x-, x+, y-, y+, z-, z+
 	int facetIdx = 0;
 	double len = sideLen/2;
 	for(int dim = 0; dim < 3; dim++){//each direction

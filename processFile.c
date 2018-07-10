@@ -57,7 +57,9 @@ void writeOutput(FILE* output, model target){
 	fclose(output);
 	puts("Output written");
 }
+oct* writeCubeOutputMasterTree = NULL;
 void writeCubeOutput(FILE* output, oct* tree, int dummy){
+	if(writeCubeOutputMasterTree == NULL) writeCubeOutputMasterTree = tree;
 	if(tree->full == 1){
 		double center[3] = {resolution*tree->corner[0], resolution*tree->corner[1], resolution*tree->corner[2]};
 		for(int dim = 0; dim < 3; dim++){
@@ -66,6 +68,8 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 		double sideLen = resolution*(1<<(tree->mag));
 		facet cube[12];
 		createCubeTriangles(center, sideLen, cube);
+		int faces[6];//x-, x+, y-, y+, z-, z+
+		triangleWriteCount+=2*exposedFaces(writeCubeOutputMasterTree, tree->corner, tree->mag, faces);
 		if(!dummy) fwrite(cube, sizeof(facet), 12, output);
 		triangleWriteCount+=12;
 	}
@@ -74,7 +78,8 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 			writeCubeOutput(output, tree->child[cIdx], dummy);
 		}
 	}
+	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
 }
-void exposedFaces(oct* tree, int* corner, int mag, int* xp, int* xn, int* yp, int* yn, int* zp, int* zn){
+int exposedFaces(oct* tree, int* corner, int mag, int* faces){
 	
 }
