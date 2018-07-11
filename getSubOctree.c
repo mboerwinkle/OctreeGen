@@ -5,28 +5,22 @@
 //FIXME there is a large problem where sometimes the low corner of a cube is referred to as 0, and sometimes -sideLen. We should really be using 0. Fix everything please.
 
 oct* getSubOctree(oct* t, int x, int y, int z, int mag, int* full){
-	getchar();
-	printf("called getSubOctree %p, %d %d %d, mag: %d\n", t, x, y, z, mag);
+//	printf("called getSubOctree %p, %d %d %d, mag: %d\n", t, x, y, z, mag);
 	if(mag > t->mag){
 		puts("Fatal error #451");
 		return NULL;//this should never happen
 	}
 	if(mag == t->mag){
-		puts("we made it to the correct magnitude");
-//		if(x != t->corner[0] || y != t->corner[1] || z != t->corner[2]){
+//FIXME this cannot exist until I fix the fixme above		if(x != t->corner[0] || y != t->corner[1] || z != t->corner[2]){
 //			puts("fatal error # 452");
 //			return NULL;//we somehow are at the correct level, but in the wrong place
 //		}
 		*full = t->full;
-		if(*full) puts("this one is full1");
-		else puts("this one is partial");
 		return t;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
 	if(t->child[cIdx] == NULL){
 		*full = t->full;
-		if(*full) puts("this one is full2");
-		else puts("this one is empty");
 		return NULL;//there is no neighbor on that side
 	}
 	int cSideLen = 1<<(t->mag-1);

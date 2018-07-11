@@ -4,7 +4,7 @@
 #include "structures.h"
 #include "octreeOps.h"
 
-double resolution = 40;
+double resolution = 0.1;
 int magnitude = 0;//magnitude 0 is a single cube centered on the origin. This never exists because we require a 1 block buffer around all objects, which cannot exist with a single block (unless the model is empty - autocheck FIXME)
 extern oct* newOct;//used in recurseCube
 extern void recurseCube(model* target, oct* currentCube);
