@@ -10,7 +10,7 @@ model loadFile(FILE* input);
 void writeOutput(FILE* output, model target);
 extern model generateOctree(model target);
 extern void createCubeTriangles(double* center, double sideLen, facet* facetArray);
-void writeCubeOutput(FILE* output, oct* tree, int dummy);
+void writeCubeOutput(FILE* output, oct* tree);
 
 void processFile(FILE* inputFile, FILE* outputFile){
 	model target = loadFile(inputFile);//create a model structure from the stl
@@ -45,15 +45,11 @@ model loadFile(FILE* input){//This does not require the fancy stuff done during 
 int triangleWriteCount = 0;
 void writeOutput(FILE* output, model target){
 //	printOctree(target.myTree);
-	puts("Dummy Write");
-	if(target.myTree != NULL) writeCubeOutput(output, target.myTree, 1);
-	printf("Dummy Write found %d triangles. Press Enter to continue, or ctrl+c to abort\n", triangleWriteCount);
-	getchar();
 	triangleWriteCount = 0;
 	puts("Writing output");
 	char stlHeader[84] = {'F'};
 	fwrite(stlHeader, 1, 84, output);//Include 4 bytes for the number of faces
-	if(target.myTree != NULL) writeCubeOutput(output, target.myTree, 0);
+	if(target.myTree != NULL) writeCubeOutput(output, target.myTree);
 	fseek(output, 80, SEEK_SET);//return to the number of faces
 	fwrite(&triangleWriteCount, sizeof(int), 1, output);
 	printf("triangles: %d\n", triangleWriteCount);
@@ -61,7 +57,7 @@ void writeOutput(FILE* output, model target){
 	puts("Output written");
 }
 oct* writeCubeOutputMasterTree = NULL;
-void writeCubeOutput(FILE* output, oct* tree, int dummy){
+void writeCubeOutput(FILE* output, oct* tree){
 	if(writeCubeOutputMasterTree == NULL) writeCubeOutputMasterTree = tree;
 	if(tree->full == 1){
 		double center[3] = {resolution*tree->corner[0], resolution*tree->corner[1], resolution*tree->corner[2]};
@@ -77,15 +73,17 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 		#else
 		triangleWriteCount+=12;
 		#endif
-		if(!dummy){
-			for(int fIdx = 0; fIdx < 6; fIdx++){
-				if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
-			}
+		if(triangleWriteCount > 2000000){
+			puts("too many triangles (>2000000). Aborting.");
+			return;
+		}
+		for(int fIdx = 0; fIdx < 6; fIdx++){
+			if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
 		}
 	}
 	for(int cIdx = 0; cIdx < 8; cIdx++){
 		if(tree->child[cIdx] != NULL){
-			writeCubeOutput(output, tree->child[cIdx], dummy);
+			writeCubeOutput(output, tree->child[cIdx]);
 		}
 	}
 	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
