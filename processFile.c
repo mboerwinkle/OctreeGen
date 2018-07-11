@@ -74,7 +74,6 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 			for(int fIdx = 0; fIdx < 6; fIdx++){
 				if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
 			}
-	//		fwrite(cube, sizeof(facet), 12, output);
 		}
 	}
 	for(int cIdx = 0; cIdx < 8; cIdx++){
@@ -85,13 +84,15 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
 }
 int exposedFaces(oct* tree, int* corner, int mag, int* faces){
+	memset(faces, 0, sizeof(int)*6);
 	int sideLen = 1<<mag;
-	for(int fIdx = 0; fIdx < 6; fIdx++){
-		faces[fIdx] = 1;
-	}
 	oct *xp, *xn, *yp, *yn, *zp, *zn;
-
-	faces[5] = 0;
+	xp = getSubOctree(tree, corner[0]+sideLen, corner[1], corner[2], mag);
+	xn = getSubOctree(tree, corner[0]-sideLen, corner[1], corner[2], mag);
+	yp = getSubOctree(tree, corner[0], corner[1]+sideLen, corner[2], mag);
+	yn = getSubOctree(tree, corner[0], corner[1]-sideLen, corner[2], mag);
+	zp = getSubOctree(tree, corner[0], corner[1], corner[2]+sideLen, mag);
+	zn = getSubOctree(tree, corner[0], corner[1], corner[2]-sideLen, mag);
 
 	int total = 0;
 	for(int fIdx = 0; fIdx < 6; fIdx++){
