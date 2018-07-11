@@ -17,13 +17,15 @@ oct* getSubOctree(oct* t, int x, int y, int z, int mag, int* full){
 //			puts("fatal error # 452");
 //			return NULL;//we somehow are at the correct level, but in the wrong place
 //		}
-//		puts("getSubOctree found something");
+		puts("this one is partial");
 		*full = t->full;
 		return t;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
 	if(t->child[cIdx] == NULL){
 		*full = t->full;
+		if(*full) puts("this one is full");
+		else puts("this one is empty");
 		return NULL;//there is no neighbor on that side
 	}
 	int cSideLen = 1<<(t->mag-1);

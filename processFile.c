@@ -5,7 +5,7 @@
 #include "octreeOps.h"
 
 //this flag culls cube faces that are completely obscured by other faces. Much smaller stl on highly contiguous models, at the expense of computation time
-//#define OCTREE_WRITE_CULL
+#define OCTREE_WRITE_CULL
 
 model loadFile(FILE* input);
 void writeOutput(FILE* output, model target);
@@ -92,6 +92,7 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
 }
 int exposedFaces(oct* tree, int* corner, int mag, int* faces){
+	printf("exposedFaces %d %d %d, mag %d\n", corner[0], corner[1], corner[2], mag);
 	memset(faces, 0, sizeof(int)*6);
 	int sideLen = 1<<mag;
 	int sL = 1<<(tree->mag-1);//this is used for hacky offset. see fixme below
