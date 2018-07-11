@@ -70,8 +70,12 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 		createCubeTriangles(center, sideLen, cube);
 		int faces[6];//x-, x+, y-, y+, z-, z+
 		triangleWriteCount+=2*exposedFaces(writeCubeOutputMasterTree, tree->corner, tree->mag, faces);
-		if(!dummy) fwrite(cube, sizeof(facet), 12, output);
-		triangleWriteCount+=12;
+		if(!dummy){
+			for(int fIdx = 0; fIdx < 6; fIdx++){
+				if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
+			}
+	//		fwrite(cube, sizeof(facet), 12, output);
+		}
 	}
 	for(int cIdx = 0; cIdx < 8; cIdx++){
 		if(tree->child[cIdx] != NULL){
@@ -81,5 +85,15 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
 }
 int exposedFaces(oct* tree, int* corner, int mag, int* faces){
-	
+	int sideLen = 1<<mag;
+	for(int fIdx = 0; fIdx < 6; fIdx++){
+		faces[fIdx] = 1;
+	}
+	faces[5] = 0;
+
+	int total = 0;
+	for(int fIdx = 0; fIdx < 6; fIdx++){
+		if(faces[fIdx]) total++;
+	}
+	return total;
 }
