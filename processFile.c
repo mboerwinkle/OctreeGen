@@ -6,7 +6,7 @@
 
 //this flag culls cube faces that are completely obscured by other faces. Much smaller stl on highly contiguous models, at the expense of computation time
 #define OCTREE_WRITE_CULL
-
+extern int cornerExistsVerbose;//FIXME
 model loadFile(FILE* input);
 void writeOutput(FILE* output, model target);
 extern model generateOctree(model target);
@@ -92,6 +92,7 @@ void writeCubeOutput(FILE* output, oct* tree, int dummy){
 	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
 }
 int exposedFaces(oct* tree, int* corner, int mag, int* faces){
+	cornerExistsVerbose = 1;//FIXME delete this bs
 	printf("exposedFaces %d %d %d, mag %d\n", corner[0], corner[1], corner[2], mag);
 	memset(faces, 0, sizeof(int)*6);
 	int sideLen = 1<<mag;
@@ -99,40 +100,46 @@ int exposedFaces(oct* tree, int* corner, int mag, int* faces){
 	oct *xp, *xn, *yp, *yn, *zp, *zn;
 	//full says if that face is blocked by a full cube of a higher magnitude than itself
 	int full[6];
-	//FIXME all of the sideLen/2's are a product of the FIXMe referenced int getSubOctree.c
-	puts("x+");
-	xp = getSubOctree(tree, corner[0]+sL+sideLen, corner[1]+sL, corner[2]+sL, mag, &(full[0]));
+	//FIXME all of the sL's are a product of the FIXMe referenced int getSubOctree.c
 	puts("x-");
-	xn = getSubOctree(tree, corner[0]+sL-sideLen, corner[1]+sL, corner[2]+sL, mag, &(full[1]));
-	puts("y+");
-	yp = getSubOctree(tree, corner[0]+sL, corner[1]+sL+sideLen, corner[2]+sL, mag, &(full[2]));
+	xn = getSubOctree(tree, corner[0]+sL-sideLen, corner[1]+sL, corner[2]+sL, mag, &(full[0]));
+	puts("x+");
+	xp = getSubOctree(tree, corner[0]+sL+sideLen, corner[1]+sL, corner[2]+sL, mag, &(full[1]));
 	puts("y-");
-	yn = getSubOctree(tree, corner[0]+sL, corner[1]+sL-sideLen, corner[2]+sL, mag, &(full[3]));
-	puts("z+");
-	zp = getSubOctree(tree, corner[0]+sL, corner[1]+sL, corner[2]+sL+sideLen, mag, &(full[4]));
+	yn = getSubOctree(tree, corner[0]+sL, corner[1]+sL-sideLen, corner[2]+sL, mag, &(full[2]));
+	puts("y+");
+	yp = getSubOctree(tree, corner[0]+sL, corner[1]+sL+sideLen, corner[2]+sL, mag, &(full[3]));
 	puts("z-");
-	zn = getSubOctree(tree, corner[0]+sL, corner[1]+sL, corner[2]+sL-sideLen, mag, &(full[5]));
+	zn = getSubOctree(tree, corner[0]+sL, corner[1]+sL, corner[2]+sL-sideLen, mag, &(full[4]));
+	puts("z+");
+	zp = getSubOctree(tree, corner[0]+sL, corner[1]+sL, corner[2]+sL+sideLen, mag, &(full[5]));
 //	printf("%p %p %p %p %p %p\n", xp, xn, yp, yn, zp, zn);
 //	printf("%d %d %d %d %d %d\n", full[0], full[1], full[2], full[3], full[4], full[5]);
 	//this chunk of code is iterating over the face of the cube, and determining if each point on the surface exists. the "!faces[x] &&" is basically an early exit to make it less intensive once it is determined that the face is needed.
 	for(int d1 = 0; d1 < sideLen; d1++){
 		for(int d2 = 0; d2 < sideLen; d2++){
-			if(!full[0] && !faces[0] && !cornerExists(xn, sideLen-1, d1, d2)){
+			if(!full[0] /*&& !faces[0] */&& !cornerExists(xn, sideLen-1, d1, d2)){
+				puts("exists");
 				faces[0] = 1;
 			}
-			if(!full[1] && !faces[1] && !cornerExists(xp, 0, d1, d2)){
+			if(!full[1] /*&& !faces[1] */&& !cornerExists(xp, 0, d1, d2)){
+				puts("exists");
 				faces[1] = 1;
 			}
-			if(!full[2] && !faces[2] && !cornerExists(yn, d1, sideLen-1, d2)){
+			if(!full[2] /*&& !faces[2] */&& !cornerExists(yn, d1, sideLen-1, d2)){
+				puts("exists");
 				faces[2] = 1;
 			}
-			if(!full[3] && !faces[3] && !cornerExists(yp, d1, 0, d2)){
+			if(!full[3] /*&& !faces[3] */&& !cornerExists(yp, d1, 0, d2)){
+				puts("exists");
 				faces[3] = 1;
 			}
-			if(!full[4] && !faces[4] && !cornerExists(zn, d1, d2, sideLen-1)){
+			if(!full[4] /*&& !faces[4] */&& !cornerExists(zn, d1, d2, sideLen-1)){
+				puts("exists");
 				faces[4] = 1;
 			}
-			if(!full[5] && !faces[5] && !cornerExists(zp, d1, d2, 0)){
+			if(!full[5] /*&& !faces[5] */&& !cornerExists(zp, d1, d2, 0)){
+				puts("exists");
 				faces[5] = 1;
 			}
 		}

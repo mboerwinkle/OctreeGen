@@ -2,16 +2,19 @@
 #include <stdlib.h>
 #include "structures.h"
 #include "octreeOps.h"
-
+int cornerExistsVerbose = 0;//FIXME delete this shit
 int cornerExists(oct* t, int x, int y, int z){
 	if(t == NULL){
+		puts("does not exist, null.");
 		return 0;
 	}
 	int sideLen = 1<<(t->mag);
 	if(x < 0 || y < 0 || z < 0 || x >= sideLen || y >= sideLen || z >= sideLen){
+		puts("invalid position");
 		return -1;//invalid
 	}
 	if(t->full){
+		puts("exists, full.");
 		return 1;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
