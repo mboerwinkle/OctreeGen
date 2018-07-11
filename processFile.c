@@ -89,6 +89,8 @@ int exposedFaces(oct* tree, int* corner, int mag, int* faces){
 	for(int fIdx = 0; fIdx < 6; fIdx++){
 		faces[fIdx] = 1;
 	}
+	oct *xp, *xn, *yp, *yn, *zp, *zn;
+
 	faces[5] = 0;
 
 	int total = 0;

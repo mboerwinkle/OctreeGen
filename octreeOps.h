@@ -21,5 +21,6 @@ extern int identifyCorner(oct* t, int x, int y, int z);
 extern void addTriangle(oct* t, facet* tri, double res);
 //determines which of the faces of the specified cube are open to the air. returns the number of exposed faces
 extern int exposedFaces(oct* tree, int* corner, int mag, int* faces);
-
+//returns a pointer to the subtree of the given magnitude at the given position
+extern oct* getSubOctree(oct* t, int x, int y, int z, int mag);
 #endif
