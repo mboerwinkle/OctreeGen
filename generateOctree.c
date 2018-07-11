@@ -4,7 +4,7 @@
 #include "structures.h"
 #include "octreeOps.h"
 
-double resolution = 2;
+double resolution = 1;
 int magnitude = 0;//magnitude 0 is a single cube centered on the origin. This never exists because we require a 1 block buffer around all objects, which cannot exist with a single block (unless the model is empty - autocheck FIXME)
 extern oct* newOct;//used in recurseCube
 extern void recurseCube(model* target, oct* currentCube);
@@ -59,7 +59,11 @@ model generateOctree(model target){//based on cubealgo.txt
 		target.myTree->corner[dim] = -sideLength/2;
 	}
 	printf("corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
+	int writeFrequency = target.facetCount/100;
 	for(int tIdx = 0; tIdx < target.facetCount; tIdx++){
+		if(writeFrequency != 0 && tIdx%writeFrequency == 0){
+			printf("facet %d of %d\n", tIdx, target.facetCount);
+		}
 		addTriangle(target.myTree, &(target.facets[tIdx]), resolution);
 	}
 	free(newOct);

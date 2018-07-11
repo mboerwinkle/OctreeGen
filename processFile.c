@@ -4,6 +4,8 @@
 #include "structures.h"
 #include "octreeOps.h"
 
+//this flag culls cube faces that are completely obscured by other faces. Much smaller stl on highly contiguous models, at the expense of computation time
+#define OCTREE_WRITE_CULL
 model loadFile(FILE* input);
 void writeOutput(FILE* output, model target);
 extern model generateOctree(model target);
@@ -42,6 +44,7 @@ model loadFile(FILE* input){//This does not require the fancy stuff done during 
 }
 int triangleWriteCount = 0;
 void writeOutput(FILE* output, model target){
+//	printOctree(target.myTree);
 	puts("Dummy Write");
 	if(target.myTree != NULL) writeCubeOutput(output, target.myTree, 1);
 	printf("Dummy Write found %d triangles. Press Enter to continue, or ctrl+c to abort\n", triangleWriteCount);
@@ -57,24 +60,79 @@ void writeOutput(FILE* output, model target){
 	fclose(output);
 	puts("Output written");
 }
+oct* writeCubeOutputMasterTree = NULL;
 void writeCubeOutput(FILE* output, oct* tree, int dummy){
+	if(writeCubeOutputMasterTree == NULL) writeCubeOutputMasterTree = tree;
 	if(tree->full == 1){
-		//if(tree->mag != 0)printf("we have a 'full' of mag %d\n", tree->mag);
 		double center[3] = {resolution*tree->corner[0], resolution*tree->corner[1], resolution*tree->corner[2]};
 		for(int dim = 0; dim < 3; dim++){
 			center[dim]+= resolution*(1<<(tree->mag))*0.5;//FIXME code dupe
 		}
 		double sideLen = resolution*(1<<(tree->mag));
-	//	printf("center %lf %lf %lf\n", center[0], center[1], center[2]);
 		facet cube[12];
-		//facet* cube = calloc(12, sizeof(facet));
 		createCubeTriangles(center, sideLen, cube);
-		if(!dummy) fwrite(cube, sizeof(facet), 12, output);
+		int faces[6] = {1, 1, 1, 1, 1, 1};//x-, x+, y-, y+, z-, z+
+		#ifdef OCTREE_WRITE_CULL
+		triangleWriteCount+=2*exposedFaces(writeCubeOutputMasterTree, tree->corner, tree->mag, faces);
+		#else
 		triangleWriteCount+=12;
+		#endif
+		if(!dummy){
+			for(int fIdx = 0; fIdx < 6; fIdx++){
+				if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
+			}
+		}
 	}
 	for(int cIdx = 0; cIdx < 8; cIdx++){
 		if(tree->child[cIdx] != NULL){
 			writeCubeOutput(output, tree->child[cIdx], dummy);
 		}
 	}
+	if(writeCubeOutputMasterTree == tree) writeCubeOutputMasterTree = NULL;
+}
+int exposedFaces(oct* tree, int* corner, int mag, int* faces){
+//	printf("exposedFaces %d %d %d, mag %d\n", corner[0], corner[1], corner[2], mag);
+	memset(faces, 0, sizeof(int)*6);
+	int sideLen = 1<<mag;
+	int sL = 1<<(tree->mag-1);//this is used for hacky offset. see fixme below
+	oct *xp, *xn, *yp, *yn, *zp, *zn;
+	//full says if that face is blocked by a full cube of a higher magnitude than itself
+	int full[6];
+	//FIXME all of the sL's are a product of the FIXMe referenced int getSubOctree.c
+	xn = getSubOctree(tree, corner[0]+sL-sideLen, corner[1]+sL, corner[2]+sL, mag, &(full[0]));
+	xp = getSubOctree(tree, corner[0]+sL+sideLen, corner[1]+sL, corner[2]+sL, mag, &(full[1]));
+	yn = getSubOctree(tree, corner[0]+sL, corner[1]+sL-sideLen, corner[2]+sL, mag, &(full[2]));
+	yp = getSubOctree(tree, corner[0]+sL, corner[1]+sL+sideLen, corner[2]+sL, mag, &(full[3]));
+	zn = getSubOctree(tree, corner[0]+sL, corner[1]+sL, corner[2]+sL-sideLen, mag, &(full[4]));
+	zp = getSubOctree(tree, corner[0]+sL, corner[1]+sL, corner[2]+sL+sideLen, mag, &(full[5]));
+//	printf("%p %p %p %p %p %p\n", xp, xn, yp, yn, zp, zn);
+//	printf("%d %d %d %d %d %d\n", full[0], full[1], full[2], full[3], full[4], full[5]);
+	//this chunk of code is iterating over the face of the cube, and determining if each point on the surface exists. the "!faces[x] &&" is basically an early exit to make it less intensive once it is determined that the face is needed.
+	for(int d1 = 0; d1 < sideLen; d1++){
+		for(int d2 = 0; d2 < sideLen; d2++){
+			if(!full[0] && !faces[0] && !cornerExists(xn, sideLen-1, d1, d2)){
+				faces[0] = 1;
+			}
+			if(!full[1] && !faces[1] && !cornerExists(xp, 0, d1, d2)){
+				faces[1] = 1;
+			}
+			if(!full[2] && !faces[2] && !cornerExists(yn, d1, sideLen-1, d2)){
+				faces[2] = 1;
+			}
+			if(!full[3] && !faces[3] && !cornerExists(yp, d1, 0, d2)){
+				faces[3] = 1;
+			}
+			if(!full[4] && !faces[4] && !cornerExists(zn, d1, d2, sideLen-1)){
+				faces[4] = 1;
+			}
+			if(!full[5] && !faces[5] && !cornerExists(zp, d1, d2, 0)){
+				faces[5] = 1;
+			}
+		}
+	}
+	int total = 0;
+	for(int fIdx = 0; fIdx < 6; fIdx++){
+		if(faces[fIdx]) total++;
+	}
+	return total;
 }

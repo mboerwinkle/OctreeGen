@@ -41,7 +41,7 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 		int fx = fDequeue->l[0], fy = fDequeue->l[1], fz = fDequeue->l[2];
 		if(cornerExists(t, fx, fy, fz)){
 			addCorner(ret, fx, fy, fz);
-			totalSize++;
+			totalSize++;//FIXME there is an error in the total size calculation. it is too big. check if addCorner is adding spots that have already been added?
 			if(!cornerExists(f, fx-1, fy, fz)){//invalid is -1. this counts as true. so we basically treat invalid spots as existing and everyone is happy
 				addCorner(f, fx-1, fy, fz);
 				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
