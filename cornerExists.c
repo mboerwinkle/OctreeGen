@@ -5,19 +5,13 @@
 
 int cornerExists(oct* t, int x, int y, int z){
 	if(t == NULL){
-//		puts("corner does not exist");
-//		getchar();
 		return 0;
 	}
 	int sideLen = 1<<(t->mag);
 	if(x < 0 || y < 0 || z < 0 || x >= sideLen || y >= sideLen || z >= sideLen){
-//		puts("invalid");
-//		getchar();
 		return -1;//invalid
 	}
 	if(t->full){
-//		puts("cornerExists!");
-//		getchar();
 		return 1;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
