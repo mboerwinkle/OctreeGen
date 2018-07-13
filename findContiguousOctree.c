@@ -13,6 +13,36 @@ typedef struct fRef{
 	struct fRef* next;
 }fRef;
 
+fRef *fEnqueue = NULL, *fDequeue = NULL;
+void enqueue(int x, int y, int z, int mag, int dir){
+	if(fEnqueue == NULL){
+		fEnqueue = malloc(sizeof(fRef));
+		fDequeue = fEnqueue;
+	}else{
+		fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
+		fEnqueue = fEnqueue->next;
+	}
+	fEnqueue->l[0] = x;
+	fEnqueue->l[1] = y;
+	fEnqueue->l[2] = z;
+	fEnqueue->mag = mag;
+	fEnqueue->dir = dir;
+	fEnqueue->next = NULL;
+}
+void dequeue(int *x, int *y, int *z, int *mag, int *dir){
+	*x = fDequeue->l[0];//FIXME operate on a fRef pointer instead of each element individually
+	*y = fDequeue->l[1];
+	*z = fDequeue->l[2];
+	*mag = fDequeue->mag;
+	*dir = fDequeue->dir;
+	if(fDequeue == fEnqueue){
+		fEnqueue = NULL;
+	}
+	fRef* old = fDequeue;
+	fDequeue = fDequeue->next;
+	free(old);
+}
+
 oct* findContiguousOctree(oct* t, int x, int y, int z){
 	puts("findContiguousOctree called");
 	//check if that corner exists
@@ -31,95 +61,40 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 	f->mag = t->mag;
 	memset(f->child, 0, 8*sizeof(oct*));
 	addCorner(f, x, y, z, 0);
-	fRef* fEnqueue = malloc(sizeof(fRef));//enqueue pointer
-	fEnqueue->l[0] = x;
-	fEnqueue->l[1] = y;
-	fEnqueue->l[2] = z;
-	fEnqueue->next = NULL;
-	fRef* fDequeue = fEnqueue;//FIXME this is ugly as fuck
+	enqueue(x, y, z, 0, 0);//FIXME would it be better to start with a high magnitude?
 	long int totalSize = 0;
 	//frontier expansion loop
 	while(fDequeue != NULL){//while there are still unexplored frontiers
-		int fx = fDequeue->l[0], fy = fDequeue->l[1], fz = fDequeue->l[2];
-		int mag = fDequeue->mag;
+		int fx, fy, fz, mag, dir;
+		dequeue(&fx, &fy, &fz, &mag, &dir);
 		if(cornerExists(t, fx, fy, fz)){
 			addCorner(ret, fx, fy, fz, 0);
 			totalSize++;//FIXME there is an error in the total size calculation. it is too big. check if addCorner is adding spots that have already been added?
 			if(!cornerExists(f, fx-1, fy, fz)){//invalid is -1. this counts as true. so we basically treat invalid spots as existing and everyone is happy
 				addCorner(f, fx-1, fy, fz, 0);
-				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
-				fEnqueue = fEnqueue->next;
-				fEnqueue->l[0] = fx-1;
-				fEnqueue->l[1] = fy;
-				fEnqueue->l[2] = fz;
-				fEnqueue->mag = 0;
-				fEnqueue->dir = 0;
-				fEnqueue->next = NULL;
+				enqueue(fx-1, fy, fz, 0, 0);
 			}
 			if(!cornerExists(f, fx+1, fy, fz)){
 				addCorner(f, fx+1, fy, fz, 0);
-				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
-				fEnqueue = fEnqueue->next;
-				fEnqueue->l[0] = fx+1;
-				fEnqueue->l[1] = fy;
-				fEnqueue->l[2] = fz;
-				fEnqueue->mag = 0;
-				fEnqueue->dir = 1;
-				fEnqueue->next = NULL;
-
+				enqueue(fx+1, fy, fz, 0, 1);
 			}
 			if(!cornerExists(f, fx, fy-1, fz)){
 				addCorner(f, fx, fy-1, fz, 0);
-				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
-				fEnqueue = fEnqueue->next;
-				fEnqueue->l[0] = fx;
-				fEnqueue->l[1] = fy-1;
-				fEnqueue->l[2] = fz;
-				fEnqueue->mag = 0;
-				fEnqueue->dir = 2;
-				fEnqueue->next = NULL;
-
+				enqueue(fx, fy-1, fz, 0, 2);
 			}
 			if(!cornerExists(f, fx, fy+1, fz)){
 				addCorner(f, fx, fy+1, fz, 0);
-				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
-				fEnqueue = fEnqueue->next;
-				fEnqueue->l[0] = fx;
-				fEnqueue->l[1] = fy+1;
-				fEnqueue->l[2] = fz;
-				fEnqueue->mag = 0;
-				fEnqueue->dir = 3;
-				fEnqueue->next = NULL;
-
+				enqueue(fx, fy+1, fz, 0, 3);
 			}
 			if(!cornerExists(f, fx, fy, fz-1)){
 				addCorner(f, fx, fy, fz-1, 0);
-				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
-				fEnqueue = fEnqueue->next;
-				fEnqueue->l[0] = fx;
-				fEnqueue->l[1] = fy;
-				fEnqueue->l[2] = fz-1;
-				fEnqueue->mag = 0;
-				fEnqueue->dir = 4;
-				fEnqueue->next = NULL;
-
+				enqueue(fx, fy, fz-1, 0, 4);
 			}
 			if(!cornerExists(f, fx, fy, fz+1)){
 				addCorner(f, fx, fy, fz+1, 0);
-				fEnqueue->next = malloc(sizeof(fRef));//FIXME this shouldn't be duplicated. sloppy sloppy
-				fEnqueue = fEnqueue->next;
-				fEnqueue->l[0] = fx;
-				fEnqueue->l[1] = fy;
-				fEnqueue->l[2] = fz+1;
-				fEnqueue->mag = 0;
-				fEnqueue->dir = 5;
-				fEnqueue->next = NULL;
-
+				enqueue(fx, fy, fz+1, 0, 5);
 			}
 		}
-		fRef* old = fDequeue;
-		fDequeue = fDequeue->next;
-		free(old);
 	}
 	freeOctree(f);
 	printf("contiguous found a volume of %ld\n", totalSize);
