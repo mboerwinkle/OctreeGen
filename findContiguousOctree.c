@@ -8,6 +8,8 @@
 //FIXME make non-recursive versions of popular octree functions to see which is faster
 typedef struct fRef{
 	int l[3];
+	int mag;
+	int direction;//x-, x+, y-, y+, z-, z+. this way, when we have to downgrade our magnitude, we know which two to add
 	struct fRef* next;
 }fRef;
 
