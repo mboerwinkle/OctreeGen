@@ -12,7 +12,7 @@ extern oct* findContiguousOctree(oct* t, int x, int y, int z);
 //returns 1 if that corner exists, or 0 if it doesn't
 extern int cornerExists(oct* t, int x, int y, int z);
 //adds a lowest-level voxel to the octree at the specified location
-extern void addCorner(oct* t, int x, int y, int z);
+extern void addCorner(oct* t, int x, int y, int z, int mag);
 //writes correct cube corner data to target, assuming parent is its parent and it is child[idx]
 extern void getCubeCorner(int idx, oct* parent, oct* target);
 //given a point inside of a cube, identifies which child it lies in
