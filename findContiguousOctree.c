@@ -41,6 +41,7 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 	//frontier expansion loop
 	while(fDequeue != NULL){//while there are still unexplored frontiers
 		int fx = fDequeue->l[0], fy = fDequeue->l[1], fz = fDequeue->l[2];
+		int mag = fDequeue->mag;
 		if(cornerExists(t, fx, fy, fz)){
 			addCorner(ret, fx, fy, fz, 0);
 			totalSize++;//FIXME there is an error in the total size calculation. it is too big. check if addCorner is adding spots that have already been added?

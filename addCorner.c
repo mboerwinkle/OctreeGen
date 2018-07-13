@@ -10,7 +10,7 @@ void addCorner(oct* t, int x, int y, int z, int mag){
 		for(int cIdx = 0; cIdx < 8; cIdx++){//FIXME function to free all children
 			if(t->child[cIdx] != NULL) freeOctree(t->child[cIdx]);
 		}
-		memset(t->child, 0, 8*sizeof(oct*));
+		memset(t->child, 0, 8*sizeof(oct*));//FIXME is memset faster or slower than just adding a "=NULL" into the above if statement?
 		return;
 	}
 	int cIdx = identifyCorner(t, x, y, z);

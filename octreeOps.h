@@ -25,4 +25,6 @@ extern int exposedFaces(oct* tree, int* corner, int mag, int* faces);
 extern oct* getSubOctree(oct* t, int x, int y, int z, int mag, int* full);
 //prints out the contents of the specified octree
 extern void printOctree(oct* t);
+//deletes the subtree of given magnitude from the specified octree (The opposite of addCorner)
+extern void deleteSubTree(oct* t, int x, int y, int z, int mag);
 #endif
