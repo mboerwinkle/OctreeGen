@@ -2,8 +2,16 @@
 #include <stdlib.h>
 #include "structures.h"
 #include "octreeOps.h"
-int cornerExists(oct* t, int x, int y, int z){
+//-1 invalid
+//0 does not exist at the specified magnitude (it is either empty or partial)
+//1 exists fully at the specified magnitude
+//
+//partial (undefined unless return value is 0)
+//0 is empty
+//1 is partial
+int cornerExists(oct* t, int x, int y, int z, int mag, int *partial){
 	if(t == NULL){
+		*partial = 0;
 		return 0;
 	}
 	int sideLen = 1<<(t->mag);
@@ -12,6 +20,10 @@ int cornerExists(oct* t, int x, int y, int z){
 	}
 	if(t->full){
 		return 1;
+	}
+	if(t->mag == mag){
+		*partial = 1;
+		return 0;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
 	//this little chunk of code is the translation to child local coordinates
