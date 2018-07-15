@@ -12,9 +12,10 @@ typedef struct fRef{
 	int dir;//x-, x+, y-, y+, z-, z+. this way, when we have to downgrade our magnitude, we know which two to add
 	struct fRef* next;
 }fRef;
-
+int queueLen = 0;
 fRef *fEnqueue = NULL, *fDequeue = NULL;
 void enqueue(int x, int y, int z, int mag, int dir){
+	queueLen++;
 	if(fEnqueue == NULL){
 		fEnqueue = malloc(sizeof(fRef));
 		fDequeue = fEnqueue;
@@ -30,6 +31,7 @@ void enqueue(int x, int y, int z, int mag, int dir){
 	fEnqueue->next = NULL;
 }
 void dequeue(int *x, int *y, int *z, int *mag, int *dir){
+	queueLen--;
 	*x = fDequeue->l[0];//FIXME operate on a fRef pointer instead of each element individually
 	*y = fDequeue->l[1];
 	*z = fDequeue->l[2];
@@ -67,45 +69,57 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 	while(fDequeue != NULL){//while there are still unexplored frontiers
 		int fx, fy, fz, mag, dir;
 		dequeue(&fx, &fy, &fz, &mag, &dir);
+		printf("dequeued %d: %d %d %d mag: %d dir: %d\n", queueLen, fx, fy, fz, mag, dir);
 		int foundMag;
 		int cornerExistsRet = cornerExists(t, fx, fy, fz, mag, &foundMag);
 		if(cornerExistsRet == 2){//exists fully
+			printf("full at lvl %d\n", foundMag);
 			int sideLen = 1<<foundMag;
+			if(foundMag > mag){
+				addCorner(f, fx, fy, fz, foundMag);
+			}
 			addCorner(ret, fx, fy, fz, foundMag);
 			//totalSize++;//FIXME there is an error in the total size calculation. it is too big. check if addCorner is adding spots that have already been added?
 			int fCornerExists = cornerExists(f, fx-sideLen, fy, fz, foundMag, NULL);
-			if(fCornerExists == 0 || fCornerExists == 1){
+			if(fCornerExists == 0/* || fCornerExists == 1*/){
 				addCorner(f, fx-sideLen, fy, fz, foundMag);
 				enqueue(fx-sideLen, fy, fz, foundMag, 0);
 			}
 			fCornerExists = cornerExists(f, fx+sideLen, fy, fz, foundMag, NULL);
-			if(fCornerExists == 0 || fCornerExists == 1){
+			if(fCornerExists == 0/* || fCornerExists == 1*/){
 				addCorner(f, fx+sideLen, fy, fz, foundMag);
 				enqueue(fx+sideLen, fy, fz, foundMag, 1);
 			}
 			fCornerExists = cornerExists(f, fx, fy-sideLen, fz, foundMag, NULL);
-			if(fCornerExists == 0 || fCornerExists == 1){
+			if(fCornerExists == 0/* || fCornerExists == 1*/){
 				addCorner(f, fx, fy-sideLen, fz, foundMag);
 				enqueue(fx, fy-sideLen, fz, foundMag, 2);
 			}
 			fCornerExists = cornerExists(f, fx, fy+sideLen, fz, foundMag, NULL);
-			if(fCornerExists == 0 || fCornerExists == 1){
+			if(fCornerExists == 0/* || fCornerExists == 1*/){
 				addCorner(f, fx, fy+sideLen, fz, foundMag);
 				enqueue(fx, fy+sideLen, fz, foundMag, 3);
 			}
 			fCornerExists = cornerExists(f, fx, fy, fz-sideLen, foundMag, NULL);
-			if(fCornerExists == 0 || fCornerExists == 1){
+			if(fCornerExists == 0/* || fCornerExists == 1*/){
 				addCorner(f, fx, fy, fz-sideLen, foundMag);
 				enqueue(fx, fy, fz-sideLen, foundMag, 4);
 			}
 			fCornerExists = cornerExists(f, fx, fy, fz+sideLen, foundMag, NULL);
-			if(fCornerExists == 0 || fCornerExists == 1){
+			if(fCornerExists == 0/* || fCornerExists == 1*/){
 				addCorner(f, fx, fy, fz+sideLen, foundMag);
 				enqueue(fx, fy, fz+sideLen, foundMag, 5);
 			}
 		}else if(cornerExistsRet == 1){//FIXME this should delete the subtree, then duplicate the ret tree to the stump. And then add the 4 new frontier full subtrees
-			oct* target = getSubOctree(f, fx, fy, fz, mag, NULL);
+			puts("partial, subdividing");
+			int isFullTest;
+			oct* target = getSubOctree(f, fx, fy, fz, mag, &isFullTest);
+			if(target == NULL){
+				printf("Im about to fail. Null cube full: %d\n", isFullTest);
+				continue;
+			}
 			if(!target->full) puts("this shouldnt happen...");
+			target->full = 0;
 			int o = 1<<(mag-1);//offset
 			if(dir == 0){//100, 101, 110, 111//FIXME remove code duplication
 				//4, 5, 6, 7
@@ -186,6 +200,8 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 			}*/
 			//to here necessary or not?
 		}
+//		printOctree(f);
+//		getchar();
 	}
 	freeOctree(f);
 	printf("contiguous found a volume of %ld\n", totalSize);
