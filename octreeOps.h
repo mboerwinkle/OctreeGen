@@ -10,7 +10,7 @@ extern oct* duplicateOctree(oct* t);
 //creates an octree that is a flood-fill of the selected point
 extern oct* findContiguousOctree(oct* t, int x, int y, int z);
 //returns 1 if that corner exists, or 0 if it doesn't
-extern int cornerExists(oct* t, int x, int y, int z);
+extern int cornerExists(oct* t, int x, int y, int z, int mag, int* foundMagnitude);
 //adds a lowest-level voxel to the octree at the specified location
 extern void addCorner(oct* t, int x, int y, int z, int mag);
 //writes correct cube corner data to target, assuming parent is its parent and it is child[idx]
@@ -27,4 +27,5 @@ extern oct* getSubOctree(oct* t, int x, int y, int z, int mag, int* full);
 extern void printOctree(oct* t);
 //deletes the subtree of given magnitude from the specified octree (The opposite of addCorner)
 extern void deleteSubTree(oct* t, int x, int y, int z, int mag);
+extern void unionOctree(oct* target, oct* modifier);
 #endif

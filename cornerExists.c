@@ -3,15 +3,13 @@
 #include "structures.h"
 #include "octreeOps.h"
 //-1 invalid
-//0 does not exist at the specified magnitude (it is either empty or partial)
-//1 exists fully at the specified magnitude
+//0 does not exist (empty)
+//1 partial (exists, but not full)
+//2 exists fully at the specified magnitude
 //
-//partial (undefined unless return value is 0)
-//0 is empty
-//1 is partial
-int cornerExists(oct* t, int x, int y, int z, int mag, int *partial){
+//foundMagnitude undefined unless return value is 2 (full)
+int cornerExists(oct* t, int x, int y, int z, int mag, int *foundMagnitude){
 	if(t == NULL){
-		*partial = 0;
 		return 0;
 	}
 	int sideLen = 1<<(t->mag);
@@ -19,11 +17,11 @@ int cornerExists(oct* t, int x, int y, int z, int mag, int *partial){
 		return -1;//invalid
 	}
 	if(t->full){
-		return 1;
+		if(foundMagnitude != NULL) *foundMagnitude = t->mag;
+		return 2;
 	}
 	if(t->mag == mag){
-		*partial = 1;
-		return 0;
+		return 1;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
 	//this little chunk of code is the translation to child local coordinates
@@ -31,7 +29,7 @@ int cornerExists(oct* t, int x, int y, int z, int mag, int *partial){
 	if(x >= sideLen) x-= sideLen;
 	if(y >= sideLen) y-= sideLen;
 	if(z >= sideLen) z-= sideLen;
-	return cornerExists(t->child[cIdx], x, y, z);//FIXME use turnaries?
+	return cornerExists(t->child[cIdx], x, y, z, mag, foundMagnitude);//FIXME use turnaries?
 }
 int identifyCorner(oct* t, int x, int y, int z){
 	int edgeLen = 1<<(t->mag-1);

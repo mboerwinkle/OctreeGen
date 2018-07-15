@@ -46,7 +46,7 @@ void dequeue(int *x, int *y, int *z, int *mag, int *dir){
 oct* findContiguousOctree(oct* t, int x, int y, int z){
 	puts("findContiguousOctree called");
 	//check if that corner exists
-	if(!cornerExists(t, x, y, z)){
+	if(!cornerExists(t, x, y, z, 0, NULL)){
 		puts("findContiguousOctree called. Result is null tree");
 		return NULL;
 	}
@@ -67,33 +67,124 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 	while(fDequeue != NULL){//while there are still unexplored frontiers
 		int fx, fy, fz, mag, dir;
 		dequeue(&fx, &fy, &fz, &mag, &dir);
-		if(cornerExists(t, fx, fy, fz)){
-			addCorner(ret, fx, fy, fz, 0);
-			totalSize++;//FIXME there is an error in the total size calculation. it is too big. check if addCorner is adding spots that have already been added?
-			if(!cornerExists(f, fx-1, fy, fz)){//invalid is -1. this counts as true. so we basically treat invalid spots as existing and everyone is happy
-				addCorner(f, fx-1, fy, fz, 0);
-				enqueue(fx-1, fy, fz, 0, 0);
+		int foundMag;
+		int cornerExistsRet = cornerExists(t, fx, fy, fz, mag, &foundMag);
+		if(cornerExistsRet == 2){//exists fully
+			int sideLen = 1<<foundMag;
+			addCorner(ret, fx, fy, fz, foundMag);
+			//totalSize++;//FIXME there is an error in the total size calculation. it is too big. check if addCorner is adding spots that have already been added?
+			int fCornerExists = cornerExists(f, fx-sideLen, fy, fz, foundMag, NULL);
+			if(fCornerExists == 0 || fCornerExists == 1){
+				addCorner(f, fx-sideLen, fy, fz, foundMag);
+				enqueue(fx-sideLen, fy, fz, foundMag, 0);
 			}
-			if(!cornerExists(f, fx+1, fy, fz)){
-				addCorner(f, fx+1, fy, fz, 0);
-				enqueue(fx+1, fy, fz, 0, 1);
+			fCornerExists = cornerExists(f, fx+sideLen, fy, fz, foundMag, NULL);
+			if(fCornerExists == 0 || fCornerExists == 1){
+				addCorner(f, fx+sideLen, fy, fz, foundMag);
+				enqueue(fx+sideLen, fy, fz, foundMag, 1);
 			}
-			if(!cornerExists(f, fx, fy-1, fz)){
-				addCorner(f, fx, fy-1, fz, 0);
-				enqueue(fx, fy-1, fz, 0, 2);
+			fCornerExists = cornerExists(f, fx, fy-sideLen, fz, foundMag, NULL);
+			if(fCornerExists == 0 || fCornerExists == 1){
+				addCorner(f, fx, fy-sideLen, fz, foundMag);
+				enqueue(fx, fy-sideLen, fz, foundMag, 2);
 			}
-			if(!cornerExists(f, fx, fy+1, fz)){
-				addCorner(f, fx, fy+1, fz, 0);
-				enqueue(fx, fy+1, fz, 0, 3);
+			fCornerExists = cornerExists(f, fx, fy+sideLen, fz, foundMag, NULL);
+			if(fCornerExists == 0 || fCornerExists == 1){
+				addCorner(f, fx, fy+sideLen, fz, foundMag);
+				enqueue(fx, fy+sideLen, fz, foundMag, 3);
 			}
-			if(!cornerExists(f, fx, fy, fz-1)){
-				addCorner(f, fx, fy, fz-1, 0);
-				enqueue(fx, fy, fz-1, 0, 4);
+			fCornerExists = cornerExists(f, fx, fy, fz-sideLen, foundMag, NULL);
+			if(fCornerExists == 0 || fCornerExists == 1){
+				addCorner(f, fx, fy, fz-sideLen, foundMag);
+				enqueue(fx, fy, fz-sideLen, foundMag, 4);
 			}
-			if(!cornerExists(f, fx, fy, fz+1)){
-				addCorner(f, fx, fy, fz+1, 0);
-				enqueue(fx, fy, fz+1, 0, 5);
+			fCornerExists = cornerExists(f, fx, fy, fz+sideLen, foundMag, NULL);
+			if(fCornerExists == 0 || fCornerExists == 1){
+				addCorner(f, fx, fy, fz+sideLen, foundMag);
+				enqueue(fx, fy, fz+sideLen, foundMag, 5);
 			}
+		}else if(cornerExistsRet == 1){//FIXME this should delete the subtree, then duplicate the ret tree to the stump. And then add the 4 new frontier full subtrees
+			oct* target = getSubOctree(f, fx, fy, fz, mag, NULL);
+			if(!target->full) puts("this shouldnt happen...");
+			int o = 1<<(mag-1);//offset
+			if(dir == 0){//100, 101, 110, 111//FIXME remove code duplication
+				//4, 5, 6, 7
+				addCorner(target, o, 0, 0, mag-1);
+				enqueue(fx+o, fy, fz, mag-1, dir);
+				addCorner(target, o, 0, o, mag-1);
+				enqueue(fx+o, fy, fz+o, mag-1, dir);
+				addCorner(target, o, o, 0, mag-1);
+				enqueue(fx+o, fy+o, fz, mag-1, dir);
+				addCorner(target, o, o, o, mag-1);
+				enqueue(fx+o, fy+o, fz+o, mag-1, dir);
+			}
+			if(dir == 1){//000, 001, 010, 011
+				//0, 1, 2, 3
+				addCorner(target, 0, 0, 0, mag-1);
+				enqueue(fx, fy, fz, mag-1, dir);
+				addCorner(target, 0, 0, o, mag-1);
+				enqueue(fx, fy, fz+o, mag-1, dir);
+				addCorner(target, 0, o, 0, mag-1);
+				enqueue(fx, fy+o, fz, mag-1, dir);
+				addCorner(target, 0, o, o, mag-1);
+				enqueue(fx, fy+o, fz+o, mag-1, dir);
+			}
+			if(dir == 2){//010, 011, 110, 111
+				//2, 3, 6, 7
+				addCorner(target, 0, o, 0, mag-1);
+				enqueue(fx, fy+o, fz, mag-1, dir);
+				addCorner(target, 0, o, o, mag-1);
+				enqueue(fx, fy+o, fz+o, mag-1, dir);
+				addCorner(target, o, o, 0, mag-1);
+				enqueue(fx+o, fy+o, fz, mag-1, dir);
+				addCorner(target, o, o, o, mag-1);
+				enqueue(fx+o, fy+o, fz+o, mag-1, dir);
+			}
+			if(dir == 3){//000, 001, 100, 101
+				//0, 1, 4, 5
+				addCorner(target, 0, 0, 0, mag-1);
+				enqueue(fx, fy, fz, mag-1, dir);
+				addCorner(target, 0, 0, o, mag-1);
+				enqueue(fx, fy, fz+o, mag-1, dir);
+				addCorner(target, o, 0, 0, mag-1);
+				enqueue(fx+o, fy, fz, mag-1, dir);
+				addCorner(target, o, 0, o, mag-1);
+				enqueue(fx+o, fy, fz+o, mag-1, dir);
+			}
+			if(dir == 4){//001, 011, 101, 111
+				//1, 3, 5, 7
+				addCorner(target, 0, 0, o, mag-1);
+				enqueue(fx, fy, fz+o, mag-1, dir);
+				addCorner(target, 0, o, o, mag-1);
+				enqueue(fx, fy+o, fz+o, mag-1, dir);
+				addCorner(target, o, 0, o, mag-1);
+				enqueue(fx+o, fy, fz+o, mag-1, dir);
+				addCorner(target, o, o, o, mag-1);
+				enqueue(fx+o, fy+o, fz+o, mag-1, dir);
+			}
+			if(dir == 5){//000, 010, 100, 110
+				//0, 2, 4, 6
+				addCorner(target, 0, 0, 0, mag-1);
+				enqueue(fx, fy, fz, mag-1, dir);
+				addCorner(target, 0, o, 0, mag-1);
+				enqueue(fx, fy+o, fz, mag-1, dir);
+				addCorner(target, o, 0, 0, mag-1);
+				enqueue(fx+o, fy, fz, mag-1, dir);
+				addCorner(target, o, o, 0, mag-1);
+				enqueue(fx+o, fy+o, fz, mag-1, dir);
+			}
+
+			//FIXME is from here:
+/*			int full;
+			oct* retDuplicate = getSubOctree(ret, fx, fy, fz, mag, &full);
+			if(retDuplicate == NULL){
+				if(full){
+					//FIXME fill in the frontier and warn that this shouldn't happen
+				}
+			}else{
+				unionOctree(target, retDuplicate);
+			}*/
+			//to here necessary or not?
 		}
 	}
 	freeOctree(f);
