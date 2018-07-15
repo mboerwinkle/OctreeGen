@@ -108,22 +108,22 @@ int exposedFaces(oct* tree, int* corner, int mag, int* faces){
 	//this chunk of code is iterating over the face of the cube, and determining if each point on the surface exists. the "!faces[x] &&" is basically an early exit to make it less intensive once it is determined that the face is needed.
 	for(int d1 = 0; d1 < sideLen; d1++){
 		for(int d2 = 0; d2 < sideLen; d2++){
-			if(!full[0] && !faces[0] && !cornerExists(xn, sideLen-1, d1, d2)){
+			if(!full[0] && !faces[0] && !cornerExists(xn, sideLen-1, d1, d2, 0, NULL)){
 				faces[0] = 1;
 			}
-			if(!full[1] && !faces[1] && !cornerExists(xp, 0, d1, d2)){
+			if(!full[1] && !faces[1] && !cornerExists(xp, 0, d1, d2, 0, NULL)){
 				faces[1] = 1;
 			}
-			if(!full[2] && !faces[2] && !cornerExists(yn, d1, sideLen-1, d2)){
+			if(!full[2] && !faces[2] && !cornerExists(yn, d1, sideLen-1, d2, 0, NULL)){
 				faces[2] = 1;
 			}
-			if(!full[3] && !faces[3] && !cornerExists(yp, d1, 0, d2)){
+			if(!full[3] && !faces[3] && !cornerExists(yp, d1, 0, d2, 0, NULL)){
 				faces[3] = 1;
 			}
-			if(!full[4] && !faces[4] && !cornerExists(zn, d1, d2, sideLen-1)){
+			if(!full[4] && !faces[4] && !cornerExists(zn, d1, d2, sideLen-1, 0, NULL)){
 				faces[4] = 1;
 			}
-			if(!full[5] && !faces[5] && !cornerExists(zp, d1, d2, 0)){
+			if(!full[5] && !faces[5] && !cornerExists(zp, d1, d2, 0, 0, NULL)){
 				faces[5] = 1;
 			}
 		}

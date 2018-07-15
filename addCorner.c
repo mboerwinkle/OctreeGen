@@ -4,28 +4,30 @@
 #include "structures.h"
 #include "octreeOps.h"
 
-void addCorner(oct* t, int x, int y, int z){
+void addCorner(oct* t, int x, int y, int z, int mag){
+	if(t->mag == mag){
+		t->full = 1;
+		for(int cIdx = 0; cIdx < 8; cIdx++){//FIXME function to free all children
+			if(t->child[cIdx] != NULL) freeOctree(t->child[cIdx]);
+		}
+		memset(t->child, 0, 8*sizeof(oct*));//FIXME is memset faster or slower than just adding a "=NULL" into the above if statement?
+		return;
+	}
 	int cIdx = identifyCorner(t, x, y, z);
 	//create target child if it doesn't exist
 	if(t->child[cIdx] == NULL){
 		t->child[cIdx] = malloc(sizeof(oct));
 		t->child[cIdx]->mag = t->mag-1;
-		if(t->child[cIdx]->mag == 0){
-			t->child[cIdx]->full = 1;
-		}else{
-			t->child[cIdx]->full = 0;
-		}
+		t->child[cIdx]->full = 0;
 		memset(t->child[cIdx]->child, 0, 8*sizeof(oct*));
 		getCubeCorner(cIdx, t, t->child[cIdx]);
 	}
-	//recurse if the child is not full
-	if(!t->child[cIdx]->full){
-		int sideLen = 1<<(t->mag-1);//FIXME code duplication
-		if(x >= sideLen) x-=sideLen;
-		if(y >= sideLen) y-=sideLen;
-		if(z >= sideLen) z-=sideLen;
-		addCorner(t->child[cIdx], x, y, z);
-	}
+	//recurse
+	int sideLen = 1<<(t->mag-1);//FIXME code duplication
+	if(x >= sideLen) x-=sideLen;
+	if(y >= sideLen) y-=sideLen;
+	if(z >= sideLen) z-=sideLen;
+	addCorner(t->child[cIdx], x, y, z, mag);
 	//test if you are full
 	int fullChildCount = 0;
 	for(int testCIdx = 0; testCIdx < 8; testCIdx++){

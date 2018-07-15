@@ -2,7 +2,13 @@
 #include <stdlib.h>
 #include "structures.h"
 #include "octreeOps.h"
-int cornerExists(oct* t, int x, int y, int z){
+//-1 invalid
+//0 does not exist (empty)
+//1 partial (exists, but not full)
+//2 exists fully at the specified magnitude
+//
+//foundMagnitude undefined unless return value is 2 (full)
+int cornerExists(oct* t, int x, int y, int z, int mag, int *foundMagnitude){
 	if(t == NULL){
 		return 0;
 	}
@@ -11,6 +17,10 @@ int cornerExists(oct* t, int x, int y, int z){
 		return -1;//invalid
 	}
 	if(t->full){
+		if(foundMagnitude != NULL) *foundMagnitude = t->mag;
+		return 2;
+	}
+	if(t->mag == mag){
 		return 1;
 	}
 	int cIdx = identifyCorner(t, x, y, z);
@@ -19,7 +29,7 @@ int cornerExists(oct* t, int x, int y, int z){
 	if(x >= sideLen) x-= sideLen;
 	if(y >= sideLen) y-= sideLen;
 	if(z >= sideLen) z-= sideLen;
-	return cornerExists(t->child[cIdx], x, y, z);//FIXME use turnaries?
+	return cornerExists(t->child[cIdx], x, y, z, mag, foundMagnitude);//FIXME use turnaries?
 }
 int identifyCorner(oct* t, int x, int y, int z){
 	int edgeLen = 1<<(t->mag-1);
