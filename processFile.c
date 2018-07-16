@@ -75,7 +75,7 @@ void writeCubeOutput(FILE* output, oct* tree){
 		#endif
 		if(triangleWriteCount > 2000000){
 			puts("too many triangles (>2000000). Aborting.");
-			return;
+			exit(1);
 		}
 		for(int fIdx = 0; fIdx < 6; fIdx++){
 			if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
