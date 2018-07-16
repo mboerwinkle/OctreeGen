@@ -61,7 +61,7 @@ model generateOctree(model target){//based on cubealgo.txt
 	printf("corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
 	int writeFrequency = target.facetCount/100;
 	for(int tIdx = 0; tIdx < target.facetCount; tIdx++){
-		if(writeFrequency != 0 && tIdx%writeFrequency == 0){
+		if(writeFrequency == 0 || tIdx%writeFrequency == 0){
 			printf("facet %d of %d\n", tIdx, target.facetCount);
 		}
 		addTriangle(target.myTree, &(target.facets[tIdx]), resolution);
