@@ -11,7 +11,7 @@ int triangleTriangleIntersect(float *a1, float *a2, float *a3, float *b1, float 
 int pointCubeIntersect(float* p, double* center, double sideLen);
 
 int cubeTriangleIntersect(double* center, double sideLen, facet triangle){
-	if(pointCubeIntersect(triangle.p1, center, sideLen)){
+	if(pointCubeIntersect(triangle.p1, center, sideLen)||pointCubeIntersect(triangle.p2, center, sideLen)||pointCubeIntersect(triangle.p3, center, sideLen)){
 		return 1;
 	}
 	facet cubeFacets[12];
