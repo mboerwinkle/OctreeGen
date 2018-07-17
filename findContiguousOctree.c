@@ -3,13 +3,14 @@
 #include <string.h>
 #include "structures.h"
 #include "octreeOps.h"
+#include "smalloc.h"
 //FIXME better implementation has a balanced binary tree of locations that is also an array. fRef keeps track of array index of frontier queue locations. using an octree for this application is inefficient since both fRef and the octree store location data for the frontier
 //FIXME better implementation can take advantage of full sectors.
 //FIXME make non-recursive versions of popular octree functions to see which is faster
 typedef struct fRef{
 	int l[3];
 	int mag;
-	int dir;//x-, x+, y-, y+, z-, z+. this way, when we have to downgrade our magnitude, we know which two to add
+	int dir;//x-, x+, y-, y+, z-, z+. this way, when we have to downgrade our magnitude, we know which four to add
 	struct fRef* next;
 }fRef;
 int queueLen = 0;
@@ -45,6 +46,10 @@ void dequeue(int *x, int *y, int *z, int *mag, int *dir){
 	free(old);
 }
 void enqueueAndFrontier(oct* f, int x, int y, int z, int mag, int dir){//FIXME nasty as fuck
+	int sideLen = 1<<mag;
+	x -= x%sideLen;
+	y -= y%sideLen;
+	z -= z%sideLen;
 	addCorner(f, x, y, z, mag);
 	enqueue(x, y, z, mag, dir);
 }
@@ -56,13 +61,13 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 		puts("findContiguousOctree called. Result is null tree");
 		return NULL;
 	}
-	oct* ret = malloc(sizeof(oct));//FIXME make this blank initialization a function instead of duplicating it a ton.
+	oct* ret = smalloc(sizeof(oct));//FIXME make this blank initialization a function instead of duplicating it a ton.
 	ret->full = 0;
 	ret->mag = t->mag;
 	memset(ret->child, 0, 8*sizeof(oct*));
 	memcpy(ret->corner, t->corner, 3*sizeof(int));
 	//if it exists, add it to the frontier
-	oct* f = malloc(sizeof(oct));//We store the frontier as an octree, since it is easily searchable, and easily editable. In addition, we keep a queue of locations for proper frontier action. Keep in mind that the frontier octree also includes all locations that have ever been part of the frontier. By the end, it will be identical to the returned octree, plus an outer shell.
+	oct* f = smalloc(sizeof(oct));//We store the frontier as an octree, since it is easily searchable, and easily editable. In addition, we keep a queue of locations for proper frontier action. Keep in mind that the frontier octree also includes all locations that have ever been part of the frontier. By the end, it will be identical to the returned octree, plus an outer shell.
 	f->full = 0;
 	f->mag = t->mag;
 	memset(f->child, 0, 8*sizeof(oct*));
@@ -154,8 +159,6 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 				enqueueAndFrontier(f, fx+o, fy+o, fz+0, mag-1, dir);
 			}
 		}
-//		printOctree(f);
-//		getchar();
 	}
 	freeOctree(f);
 	printf("contiguous found a volume of %ld\n", totalSize);

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "structures.h"
 #include "octreeOps.h"
+#include "smalloc.h"
 
 void addCorner(oct* t, int x, int y, int z, int mag){
 	if(t->mag == mag){
@@ -16,7 +17,7 @@ void addCorner(oct* t, int x, int y, int z, int mag){
 	int cIdx = identifyCorner(t, x, y, z);
 	//create target child if it doesn't exist
 	if(t->child[cIdx] == NULL){
-		t->child[cIdx] = malloc(sizeof(oct));
+		t->child[cIdx] = smalloc(sizeof(oct));
 		t->child[cIdx]->mag = t->mag-1;
 		t->child[cIdx]->full = 0;
 		memset(t->child[cIdx]->child, 0, 8*sizeof(oct*));
