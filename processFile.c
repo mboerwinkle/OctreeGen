@@ -24,6 +24,7 @@ void processFile(FILE* inputFile, FILE* outputFile){
 	target.myTree = invertOctree(inverseContiguous);//leaving you with just the contiguous
 	freeOctree(inverseContiguous);
 	inverseContiguous = NULL;
+	printTreeStats(target.myTree);
 	writeOutput(outputFile, target);//write the octree to file
 	free(target.facets);
 	freeOctree(target.myTree);
