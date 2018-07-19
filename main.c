@@ -6,6 +6,7 @@
 extern void processFile(FILE* inputFile, FILE* outputFile);
 int main(int argc, char** argv){
 	FILE *inputFile, *outputFile;
+	printf("oct size: %ld\n", sizeof(oct));
 	if(argc == 1){//process everything
 		FILE* contentsFp = fopen("contents.txt", "r");
 		if(contentsFp == NULL){

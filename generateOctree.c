@@ -59,7 +59,7 @@ model generateOctree(model target){//based on cubealgo.txt
 		target.myTree->corner[dim] = -sideLength/2;
 	}
 	printf("corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
-	int writeFrequency = target.facetCount/100;
+	int writeFrequency = target.facetCount/10;
 	for(int tIdx = 0; tIdx < target.facetCount; tIdx++){
 		if(writeFrequency == 0 || tIdx%writeFrequency == 0){
 			printf("facet %d of %d\n", tIdx, target.facetCount);
