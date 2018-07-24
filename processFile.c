@@ -11,6 +11,7 @@ void writeOutput(FILE* output, model target);
 extern model generateOctree(model target);
 extern void createCubeTriangles(double* center, double sideLen, facet* facetArray);
 void writeCubeOutput(FILE* output, oct* tree);
+void writeRawOctree(FILE* output, oct* tree);
 
 void processFile(FILE* inputFile, FILE* outputFile){
 	model target = loadFile(inputFile);//create a model structure from the stl
@@ -25,10 +26,28 @@ void processFile(FILE* inputFile, FILE* outputFile){
 	freeOctree(inverseContiguous);
 	inverseContiguous = NULL;
 	printTreeStats(target.myTree);
-	writeOutput(outputFile, target);//write the octree to file
+	//writeOutput(outputFile, target);//write the octree to file
+	writeRawOctree(outputFile, target.myTree);
 	free(target.facets);
 	freeOctree(target.myTree);
+	fclose(outputFile);
 }
+
+void writeRawOctree(FILE* output, oct* tree){
+	if(tree->full){
+		fputc('F', output);
+	}else{
+		fputc('P', output);
+		for(int c = 0; c < 8; c++){
+			if(tree->child[c] == NULL){
+				fputc('E', output);
+			}else{
+				writeRawOctree(output, tree->child[c]);
+			}
+		}
+	}
+}
+
 model loadFile(FILE* input){//This does not require the fancy stuff done during rendering where triangles have point references. We are doing this quick and dirty
 	model ret;
 	//skip header
@@ -54,7 +73,6 @@ void writeOutput(FILE* output, model target){
 	fseek(output, 80, SEEK_SET);//return to the number of faces
 	fwrite(&triangleWriteCount, sizeof(int), 1, output);
 	printf("triangles: %d\n", triangleWriteCount);
-	fclose(output);
 	puts("Output written");
 }
 oct* writeCubeOutputMasterTree = NULL;
