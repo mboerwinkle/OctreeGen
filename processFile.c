@@ -28,6 +28,7 @@ void processFile(FILE* inputFile, FILE* outputFile){
 	printTreeStats(target.myTree);
 	//writeOutput(outputFile, target);//write the octree to file
 	writeRawOctree(outputFile, target.myTree);
+	fflush(outputFile);
 	free(target.facets);
 	freeOctree(target.myTree);
 	fclose(outputFile);
