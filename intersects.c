@@ -11,13 +11,30 @@ int triangleTriangleIntersect(float *a1, float *a2, float *a3, float *b1, float 
 int pointCubeIntersect(float* p, double* center, double sideLen);
 
 int cubeTriangleIntersect(double* center, double sideLen, facet triangle){
-	if(pointCubeIntersect(triangle.p1, center, sideLen)||pointCubeIntersect(triangle.p2, center, sideLen)||pointCubeIntersect(triangle.p3, center, sideLen)){
+	float tp1[3];
+	float tp2[3];
+	float tp3[3];
+	for(int idx = 0; idx < 3; idx++){//This is BS to avoid issues with packed structure member pointers - this should be redone by having an unpacking phase early on instead FIXME
+		tp1[idx] = triangle.p1[idx];
+		tp2[idx] = triangle.p2[idx];
+		tp3[idx] = triangle.p3[idx];
+	}
+	if(pointCubeIntersect(tp1, center, sideLen)||pointCubeIntersect(tp2, center, sideLen)||pointCubeIntersect(tp3, center, sideLen)){
 		return 1;
 	}
 	facet cubeFacets[12];
 	createCubeTriangles(center, sideLen, cubeFacets);
 	for(int f = 0; f < 12; f++){
-		if(triangleTriangleIntersect(cubeFacets[f].p1, cubeFacets[f].p2, cubeFacets[f].p3, triangle.p1, triangle.p2, triangle.p3)) return 1;
+		float cp1[3];
+		float cp2[3];
+		float cp3[3];
+		for(int idx = 0; idx < 3; idx++){//This is BS to avoid issues with packed structure member pointers - this should be redone by having an unpacking phase early on instead FIXME
+			cp1[idx] = cubeFacets[f].p1[idx];
+			cp2[idx] = cubeFacets[f].p2[idx];
+			cp3[idx] = cubeFacets[f].p3[idx];
+		}
+
+		if(triangleTriangleIntersect(cp1,cp2,cp3,tp1,tp2,tp3)) return 1;
 	}
 	return 0;
 }

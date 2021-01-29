@@ -10,7 +10,7 @@ extern oct* newOct;//used in recurseCube
 extern void recurseCube(model* target, oct* currentCube);
 extern int cubeExists(model* target, oct* currentCube);
 
-model generateOctree(model target){//based on cubealgo.txt
+model generateOctree(model target, double modelSize){//based on cubealgo.txt
 	//initialize values
 	target.myTree = NULL;
 	float* min = target.min;
@@ -20,24 +20,38 @@ model generateOctree(model target){//based on cubealgo.txt
 		max[dim] = 0;
 	}
 	for(int fIdx = 0; fIdx < target.facetCount; fIdx++){
-		float* p1 = target.facets[fIdx].p1;
-		float* p2 = target.facets[fIdx].p2;
-		float* p3 = target.facets[fIdx].p3;
+		facet* f = &(target.facets[fIdx]);
 		for(int dim = 0; dim < 3; dim++){
-			if(p1[dim] < min[dim]) min[dim] = p1[dim];
-			if(p1[dim] > max[dim]) max[dim] = p1[dim];
-			if(p2[dim] < min[dim]) min[dim] = p2[dim];
-			if(p2[dim] > max[dim]) max[dim] = p2[dim];
-			if(p3[dim] < min[dim]) min[dim] = p3[dim];
-			if(p3[dim] > max[dim]) max[dim] = p3[dim];
+			if(f->p1[dim] < min[dim]) min[dim] = f->p1[dim];
+			if(f->p1[dim] > max[dim]) max[dim] = f->p1[dim];
+			if(f->p2[dim] < min[dim]) min[dim] = f->p2[dim];
+			if(f->p2[dim] > max[dim]) max[dim] = f->p2[dim];
+			if(f->p3[dim] < min[dim]) min[dim] = f->p3[dim];
+			if(f->p3[dim] > max[dim]) max[dim] = f->p3[dim];
 		}
 	}
-	printf("min: %f %f %f\nmax: %f %f %f\n", min[0],min[1],min[2], max[0],max[1],max[2]);
+	float maxdiff = 0;
+	for(int dim = 0; dim < 3; dim++){
+		if(max[dim]-min[dim] > maxdiff) maxdiff = max[dim]-min[dim];
+	}
+	for(int dim = 0; dim < 3; dim++){
+		min[dim] *= modelSize/maxdiff;
+		max[dim] *= modelSize/maxdiff;
+	}
+	for(int fIdx = 0; fIdx < target.facetCount; fIdx++){//Fixme this should be doable as a greatest multiplier like resolution is done
+		facet* f = &(target.facets[fIdx]);
+		for(int dim = 0; dim < 3; dim++){
+			f->p1[dim] *= modelSize/maxdiff;
+			f->p2[dim] *= modelSize/maxdiff;
+			f->p3[dim] *= modelSize/maxdiff;
+		}
+	}
 	double greatest = 0;
 	for(int dim = 0; dim < 3; dim++){
 		if(-min[dim] > greatest) greatest = -min[dim];
 		if(max[dim] > greatest) greatest = max[dim];
 	}
+	printf("min: %f %f %f\nmax: %f %f %f\n", min[0],min[1],min[2], max[0],max[1],max[2]);
 	printf("greatest: %lf\n", greatest);
 	greatest/=resolution;//greatest divided by resolution so we can ignore resolution from now on
 	while(greatest*2+2 > 1<<magnitude){//multiply greatest by 2 because maximum magnitude cube is centered on the origin. +2 for the buffer on each side.

@@ -60,17 +60,17 @@ void getCubeCorner(int idx, oct* parent, oct* target){
 	getCorner(idx, c[0], c[1], c[2], sc[0], sc[1], sc[2], target->corner);//FIXME combime into one function.
 }
 void getCorner(int idx, int x1, int y1, int z1, int x2, int y2, int z2, int* write){
-	if(idx < 4){
+	if(idx < 4){//0, 1, 2, 3
 		write[0] = x1;
 	}else{
 		write[0] = x2;
 	}
-	if(idx < 2 || (idx >= 4 && idx < 6)){
+	if(idx < 2 || (idx >= 4 && idx < 6)){//0, 1, 4, 5
 		write[1] = y1;
 	}else{
 		write[1] = y2;
 	}
-	if(idx%2 == 0){
+	if(idx%2 == 0){//0, 2, 4, 6
 		write[2] = z1;
 	}else{
 		write[2] = z2;

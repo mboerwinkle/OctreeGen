@@ -3,32 +3,11 @@
 #include <string.h>
 #include "structures.h"
 
-extern void processFile(FILE* inputFile, FILE* outputFile);
+extern void processFile(FILE* inputFile, FILE* outputFile, double modelSize);
 int main(int argc, char** argv){
 	FILE *inputFile, *outputFile;
-	printf("oct size: %ld\n", sizeof(oct));
-	if(argc == 1){//process everything
-		FILE* contentsFp = fopen("contents.txt", "r");
-		if(contentsFp == NULL){
-			puts("contents.txt failed to open");
-			return 1;
-		}
-		char filename[110];
-		while(EOF != fscanf(contentsFp, "%s", filename)){//FIXME this block is nasty AF
-			char extFilename[110];//including extension
-			strncpy(extFilename, filename, 90);
-			strcat(extFilename, ".stl");
-			inputFile = fopen(extFilename, "r");
-			if(inputFile == NULL){
-				printf("failed to open %s\n", extFilename);
-				continue;
-			}
-			strncpy(extFilename, filename, 90);
-			strcat(extFilename, "_Voxel.txt");
-			outputFile = fopen(extFilename, "w");
-			processFile(inputFile, outputFile);
-		}
-	}else if(argc >= 2 && argc < 5){//process only indicated file
+	printf("oct size: %ld bytes\n", sizeof(oct));
+	if(argc == 5){
 		inputFile = fopen(argv[1], "r");
 		if(inputFile == NULL){
 			printf("failed to open %s\n", argv[1]);
@@ -43,9 +22,9 @@ int main(int argc, char** argv){
 		}else{
 			outputFile = stdout;
 		}
-		processFile(inputFile, outputFile);
+		processFile(inputFile, outputFile, atof(argv[4]));
 	}else{//usage
-		puts("Usage: ./run [input file [output file [resolution]]]");
+		puts("Usage: ./run inputfile outputfile resolution modelsize");
 		return 1;
 	}
 	return 0;

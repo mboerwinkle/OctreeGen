@@ -8,14 +8,14 @@
 #define OCTREE_WRITE_CULL
 model loadFile(FILE* input);
 void writeOutput(FILE* output, model target);
-extern model generateOctree(model target);
+extern model generateOctree(model target, double modelSize);
 extern void createCubeTriangles(double* center, double sideLen, facet* facetArray);
 void writeCubeOutput(FILE* output, oct* tree);
 void writeRawOctree(FILE* output, oct* tree);
 
-void processFile(FILE* inputFile, FILE* outputFile){
+void processFile(FILE* inputFile, FILE* outputFile, double modelSize){
 	model target = loadFile(inputFile);//create a model structure from the stl
-	target = generateOctree(target);//populates the model's octree
+	target = generateOctree(target, modelSize);//populates the model's octree
 	oct* inverse = invertOctree(target.myTree);
 	freeOctree(target.myTree);
 	target.myTree = NULL;
@@ -26,8 +26,9 @@ void processFile(FILE* inputFile, FILE* outputFile){
 	freeOctree(inverseContiguous);
 	inverseContiguous = NULL;
 	printTreeStats(target.myTree);
-	//writeOutput(outputFile, target);//write the octree to file
-	writeRawOctree(outputFile, target.myTree);
+	//writeOutput(outputFile, target);//write the octree to file as stl
+	fputc('3', outputFile);
+	writeRawOctree(outputFile, target.myTree);//write the octree to file as ocls
 	fflush(outputFile);
 	free(target.facets);
 	freeOctree(target.myTree);
