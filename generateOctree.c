@@ -5,6 +5,7 @@
 #include "octreeOps.h"
 
 double resolution = 1;
+char expandflag = 0;
 int magnitude = 0;//magnitude 0 is a single cube centered on the origin. This never exists because we require a 1 block buffer around all objects, which cannot exist with a single block (unless the model is empty - autocheck FIXME)
 extern oct* newOct;//used in recurseCube
 extern void recurseCube(model* target, oct* currentCube);
@@ -56,6 +57,10 @@ model generateOctree(model target, double modelSize){//based on cubealgo.txt
 	greatest/=resolution;//greatest divided by resolution so we can ignore resolution from now on
 	while(greatest*2+2 > 1<<magnitude){//multiply greatest by 2 because maximum magnitude cube is centered on the origin. +2 for the buffer on each side.
 		magnitude++;
+	}
+	if(expandflag){
+		printf("increasing magnitude for safe expansion\n");
+		magnitude += 2;
 	}
 	printf("magnitude: %d\n", magnitude);
 	int sideLength = 1<<magnitude;

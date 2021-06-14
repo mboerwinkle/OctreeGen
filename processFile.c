@@ -25,6 +25,11 @@ void processFile(FILE* inputFile, FILE* outputFile, double modelSize){
 	target.myTree = invertOctree(inverseContiguous);//leaving you with just the contiguous
 	freeOctree(inverseContiguous);
 	inverseContiguous = NULL;
+	if(expandflag){
+		oct* expanded = expandOctree(target.myTree);
+		freeOctree(target.myTree);
+		target.myTree = expanded;
+	}
 	printTreeStats(target.myTree);
 	//writeOutput(outputFile, target);//write the octree to file as stl
 	fputc('3', outputFile);

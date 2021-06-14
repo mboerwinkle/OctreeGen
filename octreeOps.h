@@ -9,6 +9,8 @@ extern oct* invertOctree(oct* t);
 extern oct* duplicateOctree(oct* t);
 //creates an octree that is a flood-fill of the selected point
 extern oct* findContiguousOctree(oct* t, int x, int y, int z);
+//sets all empty cubes which border a partial cube to partial. Sets all full cubes that border a partial or empty to partial. result is not a strictly valid octree.
+extern oct* expandOctree(oct* t);
 //returns 1 if that corner exists, or 0 if it doesn't
 extern int cornerExists(oct* t, int x, int y, int z, int mag, int* foundMagnitude);
 //adds a lowest-level voxel to the octree at the specified location

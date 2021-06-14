@@ -3,6 +3,7 @@
 #include <inttypes.h>
 extern double resolution;
 extern int magnitude;
+extern char expandflag;
 typedef struct facet{
 	float vec[3];
 	float p1[3];

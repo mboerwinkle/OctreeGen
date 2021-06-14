@@ -4,6 +4,16 @@
 #include <string.h>
 #include "structures.h"
 
+char helptext[] = "\
+USAGE:\n\
+-h,--help\n\
+-i,--input <input STL path> (REQUIRED)\n\
+-o,--output <output octree path> (REQUIRED)\n\
+-r,--resolution <real-valued smallest voxel size>\n\
+-s,--size <real-valued longest STL dimension target size>\n\
+-e,--expand (Unsuitable for most applications. Makes full cubes partial if they are not fully surrounded by full cubes. Makes empty cubes partial if they have a full or partial neighbor.)\n\
+";
+
 extern void processFile(FILE* inputFile, FILE* outputFile, double modelSize);
 int main(int argc, char** argv){
 	FILE *inputFile = NULL, *outputFile = NULL;
@@ -17,11 +27,13 @@ int main(int argc, char** argv){
 		{"output", required_argument, NULL, 'o'},
 		{"resolution", required_argument, NULL, 'r'},
 		{"size", required_argument, NULL, 's'},
+		{"expand", no_argument, NULL, 'e'},
 		{0,0,0,0}
 	};
+	static char short_options[] = "hi:o:r:s:e";
 	while(1){
 		int option_index = 0;
-		int c = getopt_long(argc, argv, "hi:o:r:s:", long_options, &option_index);
+		int c = getopt_long(argc, argv, short_options, long_options, &option_index);
 		if(c == -1) break;
 		switch(c){
 			case 'i':
@@ -44,10 +56,14 @@ int main(int argc, char** argv){
 				stldimsize = atof(optarg);
 				printf("STL dimension size set to %lf\n", stldimsize);
 				break;
+			case 'e':
+				expandflag = 1;
+				printf("Expand ON\n");
+				break;
 			case 'h':
 			case '?':
 			default:
-				printf("USAGE:\n-h,--help\n-i,--input <input STL path> (REQUIRED)\n-o,--output <output octree path> (REQUIRED)\n-r,--resolution <real-valued smallest voxel size>\n-s,--size <real-valued longest STL dimension target size>\n");
+				printf(helptext);
 				return -1;
 		}
 	}

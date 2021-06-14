@@ -57,24 +57,10 @@ void getCubeCorner(int idx, oct* parent, oct* target){
 	for(int dim = 0; dim < 3; dim++){
 		sc[dim]+=1<<(parent->mag-1);
 	}
-	getCorner(idx, c[0], c[1], c[2], sc[0], sc[1], sc[2], target->corner);//FIXME combime into one function.
-}
-void getCorner(int idx, int x1, int y1, int z1, int x2, int y2, int z2, int* write){
-	if(idx < 4){//0, 1, 2, 3
-		write[0] = x1;
-	}else{
-		write[0] = x2;
-	}
-	if(idx < 2 || (idx >= 4 && idx < 6)){//0, 1, 4, 5
-		write[1] = y1;
-	}else{
-		write[1] = y2;
-	}
-	if(idx%2 == 0){//0, 2, 4, 6
-		write[2] = z1;
-	}else{
-		write[2] = z2;
-	}
+	int* write = target->corner;
+	write[0] = (idx < 4)?c[0]:sc[0];
+	write[1] = (idx < 2 || (idx >= 4 && idx < 6))?c[1]:sc[1];
+	write[2] = (idx%2 == 0)?c[2]:sc[2];
 }
 
 int cubeExists(model* target, oct* currentCube){
