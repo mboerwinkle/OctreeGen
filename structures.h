@@ -4,6 +4,7 @@
 extern double resolution;
 extern int magnitude;
 extern char expandflag;
+extern char stlflag;
 typedef struct facet{
 	float vec[3];
 	float p1[3];

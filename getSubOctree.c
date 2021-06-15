@@ -7,7 +7,7 @@
 oct* getSubOctree(oct* t, int x, int y, int z, int mag, int* full){
 //	printf("called getSubOctree %p, %d %d %d, mag: %d\n", t, x, y, z, mag);
 	if(mag > t->mag){
-		puts("Fatal error #451");
+		fprintf(stderr, "Poorly ordered magnitudes\n");
 		return NULL;//this should never happen
 	}
 	if(mag == t->mag){

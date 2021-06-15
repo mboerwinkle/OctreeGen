@@ -55,10 +55,10 @@ void enqueueAndFrontier(oct* f, int x, int y, int z, int mag, int dir){//FIXME n
 }
 
 oct* findContiguousOctree(oct* t, int x, int y, int z){
-	puts("findContiguousOctree called");
+	fprintf(stderr, "findContiguousOctree called\n");
 	//check if that corner exists
 	if(!cornerExists(t, x, y, z, 0, NULL)){
-		puts("findContiguousOctree called. Result is null tree");
+		fprintf(stderr, "findContiguousOctree called. Result is null tree\n");
 		return NULL;
 	}
 	oct* ret = smalloc(sizeof(oct));//FIXME make this blank initialization a function instead of duplicating it a ton.

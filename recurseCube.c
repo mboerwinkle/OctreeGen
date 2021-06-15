@@ -68,15 +68,11 @@ int cubeExists(model* target, oct* currentCube){
 		center[dim]+=resolution*(1<<(currentCube->mag))*0.5;//FIXME store sidelength as arbitrary precision fixed point describing side length instead
 	}
 	double sideLen = resolution*(1<<(currentCube->mag));
-//	printf("testing cube %lf %lf %lf sidelen %lf magnitude %d\n", center[0], center[1], center[2], sideLen, currentCube->mag);
+//	fprintf(stderr, "testing cube %lf %lf %lf sidelen %lf magnitude %d\n", center[0], center[1], center[2], sideLen, currentCube->mag);
 	for(int tFacet = 0; tFacet < target->facetCount; tFacet++){
 		if(cubeTriangleIntersect(center, sideLen, target->facets[tFacet])){//FIXME do not recalculate cube faces each time
-//			puts("exists!");
-//			getchar();
 			return 1;
 		}
 	}
-//	puts("does not exist");
-//	getchar();
 	return 0;
 }

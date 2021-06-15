@@ -4,7 +4,7 @@
 void* smalloc(size_t size){
 	void* ret = malloc(size);
 	if(ret == NULL){
-		puts("malloc returned NULL");
+		fprintf(stderr, "malloc returned NULL\n");
 	}
 	return ret;
 }

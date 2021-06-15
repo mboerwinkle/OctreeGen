@@ -22,10 +22,10 @@ void printTreeStatsRec(oct* t){
 void printTreeStats(oct* t){
 	cubeCount = calloc(t->mag+1, sizeof(int));
 	printTreeStatsRec(t);
-	printf("CUBE VOLUME: %ld\n", cubeVolume);
-	puts("CUBE BREAKDOWN");
+	fprintf(stderr, "CUBE VOLUME: %ld\n", cubeVolume);
+	fprintf(stderr, "CUBE BREAKDOWN\n");
 	for(int x = t->mag; x >= 0; x--){
-		printf("%d: %d\n", x, cubeCount[x]);
+		fprintf(stderr, "%d: %d\n", x, cubeCount[x]);
 	}
 	free(cubeCount);
 	cubeCount = NULL;

@@ -52,23 +52,23 @@ model generateOctree(model target, double modelSize){//based on cubealgo.txt
 		if(-min[dim] > greatest) greatest = -min[dim];
 		if(max[dim] > greatest) greatest = max[dim];
 	}
-	printf("min: %f %f %f\nmax: %f %f %f\n", min[0],min[1],min[2], max[0],max[1],max[2]);
-	printf("greatest: %lf\n", greatest);
+	fprintf(stderr, "min: %f %f %f\nmax: %f %f %f\n", min[0],min[1],min[2], max[0],max[1],max[2]);
+	fprintf(stderr, "greatest: %lf\n", greatest);
 	greatest/=resolution;//greatest divided by resolution so we can ignore resolution from now on
 	while(greatest*2+2 > 1<<magnitude){//multiply greatest by 2 because maximum magnitude cube is centered on the origin. +2 for the buffer on each side.
 		magnitude++;
 	}
 	if(expandflag){
-		printf("increasing magnitude for safe expansion\n");
+		fprintf(stderr, "increasing magnitude for safe expansion\n");
 		magnitude += 2;
 	}
-	printf("magnitude: %d\n", magnitude);
+	fprintf(stderr, "magnitude: %d\n", magnitude);
 	int sideLength = 1<<magnitude;
 	if(sideLength >= 2097100){//just ~(2^63)^(1/3)
-		puts("Volume Overflows long int");
+		fprintf(stderr, "Volume Overflows long int\n");
 	}
 	long int volume = sideLength*sideLength*sideLength;
-	printf("sideLength: %d\nvolume: %ld\n", sideLength, volume);
+	fprintf(stderr, "sideLength: %d\nvolume: %ld\n", sideLength, volume);
 	//find boundary
 	target.myTree = malloc(sizeof(oct));
 	target.myTree->mag = magnitude;
@@ -77,11 +77,11 @@ model generateOctree(model target, double modelSize){//based on cubealgo.txt
 	for(int dim = 0; dim < 3; dim++){
 		target.myTree->corner[dim] = -sideLength/2;
 	}
-	printf("corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
+	fprintf(stderr, "corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
 	int writeFrequency = target.facetCount/10;
 	for(int tIdx = 0; tIdx < target.facetCount; tIdx++){
 		if(writeFrequency == 0 || tIdx%writeFrequency == 0){
-			printf("facet %d of %d\n", tIdx, target.facetCount);
+			fprintf(stderr, "facet %d of %d\n", tIdx, target.facetCount);
 		}
 		addTriangle(target.myTree, &(target.facets[tIdx]), resolution);
 	}
@@ -93,6 +93,6 @@ model generateOctree(model target, double modelSize){//based on cubealgo.txt
 		free(target.myTree);
 		target.myTree = NULL;
 	}*/
-	puts("Done finding border");
+	fprintf(stderr, "Done finding border\n");
 	return target;
 }

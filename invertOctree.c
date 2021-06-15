@@ -5,7 +5,7 @@
 #include "octreeOps.h"
 
 oct* invertOctree(oct* t){//duplicates all non-full cubes. Replaces nulls with full cubes, and full cubes with nulls
-	if(t == NULL) printf("FATAL! invertOctree cannot operate on NULL pointer\n");
+	if(t == NULL) fprintf(stderr, "FATAL! invertOctree cannot operate on NULL pointer\n");
 	if(t->full) return NULL;
 	oct* ret = malloc(sizeof(oct));
 	ret->mag = t->mag;

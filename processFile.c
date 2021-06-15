@@ -31,9 +31,14 @@ void processFile(FILE* inputFile, FILE* outputFile, double modelSize){
 		target.myTree = expanded;
 	}
 	printTreeStats(target.myTree);
-	//writeOutput(outputFile, target);//write the octree to file as stl
-	fputc('3', outputFile);
-	writeRawOctree(outputFile, target.myTree);//write the octree to file as ocls
+	if(stlflag){
+		//write the octree to file as stl
+		writeOutput(outputFile, target);
+	}else{
+		//write the octree to file as ocls
+		fputc('3', outputFile);
+		writeRawOctree(outputFile, target.myTree);
+	}
 	fflush(outputFile);
 	free(target.facets);
 	freeOctree(target.myTree);
@@ -61,7 +66,7 @@ model loadFile(FILE* input){//This does not require the fancy stuff done during 
 	fseek(input, 80, SEEK_SET);
 	//read triangle count
 	fread(&(ret.facetCount), sizeof(uint32_t), 1, input);
-	printf("%d facets\n", ret.facetCount);
+	fprintf(stderr, "%d facets\n", ret.facetCount);
 	//allocate space for the triangles
 	ret.facets = calloc(ret.facetCount, sizeof(facet));
 	//read in all the triangles
@@ -73,14 +78,14 @@ int triangleWriteCount = 0;
 void writeOutput(FILE* output, model target){
 //	printOctree(target.myTree);
 	triangleWriteCount = 0;
-	puts("Writing output");
+	fprintf(stderr, "Writing output\n");
 	char stlHeader[84] = {'F'};
 	fwrite(stlHeader, 1, 84, output);//Include 4 bytes for the number of faces
 	if(target.myTree != NULL) writeCubeOutput(output, target.myTree);
 	fseek(output, 80, SEEK_SET);//return to the number of faces
 	fwrite(&triangleWriteCount, sizeof(int), 1, output);
-	printf("triangles: %d\n", triangleWriteCount);
-	puts("Output written");
+	fprintf(stderr, "triangles: %d\n", triangleWriteCount);
+	fprintf(stderr, "Output written\n");
 }
 oct* writeCubeOutputMasterTree = NULL;
 void writeCubeOutput(FILE* output, oct* tree){
@@ -103,8 +108,8 @@ void writeCubeOutput(FILE* output, oct* tree){
 			if(faces[fIdx]) fwrite(&(cube[fIdx*2]), sizeof(facet), 2, output);
 		}
 		if(triangleWriteCount > 4000000){
-			puts("too many triangles (>4000000). Aborting.");
-			printf("wrote %d triangles\n", triangleWriteCount);
+			fprintf(stderr, "too many triangles (>4000000). Aborting.\n");
+			fprintf(stderr, "wrote %d triangles\n", triangleWriteCount);
 			fclose(output);
 			exit(1);
 		}

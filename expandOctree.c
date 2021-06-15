@@ -72,7 +72,7 @@ void expandOctreeRec(oct* t, oct* ref){
 	}
 }
 oct* expandOctree(oct* t){
-	puts("called expandOctree");
+	fprintf(stderr, "called expandOctree\n");
 	if(t == NULL) return NULL;
 	oct* ret = duplicateOctree(t);
 	expandOctreeRec(ret, t);

@@ -9,7 +9,7 @@ int setMeToNull = 0;//FIXME shouldn't exist. instead, take a oct** t instead of 
 
 void deleteSubTree(oct* t, int x, int y, int z, int mag){
 	if(t == NULL){
-		puts("Deleting failed. though this is supported by the spec, it shouldn't happen in the current version");
+		fprintf(stderr, "Deleting failed. though this is supported by the spec, it shouldn't happen in the current version\n");
 		return;
 	}
 	if(t->mag == mag){
