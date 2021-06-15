@@ -16,7 +16,7 @@ extern int cornerExists(oct* t, int x, int y, int z, int mag, int* foundMagnitud
 //adds a lowest-level voxel to the octree at the specified location
 extern void addCorner(oct* t, int x, int y, int z, int mag);
 //writes correct cube corner data to target, assuming parent is its parent and it is child[idx]
-extern void getCubeCorner(int idx, oct* parent, oct* target);
+extern void getCubeCorner(int idx, oct* parent, int* target);
 //given a point inside of a cube, identifies which child it lies in
 extern int identifyCorner(oct* t, int x, int y, int z);
 //adds all of the lowest level voxels that intersect the given facet to the octree

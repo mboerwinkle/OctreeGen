@@ -27,7 +27,7 @@ int recurseCube(model* target, oct* currentCube){//returns 1 if full, or 0 if in
 			memset(newOct->child, 0, 8*sizeof(oct*)); 
 		}
 	//	getCorner(cIdx, c[0], c[1], c[2], sc[0], sc[1], sc[2], newOct->corner);
-		getCubeCorner(cIdx, currentCube, newOct);
+		getCubeCorner(cIdx, currentCube, newOct->corner);
 		newOct->mag = currentCube->mag-1;
 		if(cubeExists(target, newOct)){
 			currentCube->child[cIdx] = newOct;
@@ -49,7 +49,7 @@ int recurseCube(model* target, oct* currentCube){//returns 1 if full, or 0 if in
 	}
 	return currentCube->full;
 }
-void getCubeCorner(int idx, oct* parent, oct* target){
+void getCubeCorner(int idx, oct* parent, int* target){
 	int c[3];
 	memcpy(c, parent->corner, 3*sizeof(int));
 	int sc[3];
@@ -57,10 +57,9 @@ void getCubeCorner(int idx, oct* parent, oct* target){
 	for(int dim = 0; dim < 3; dim++){
 		sc[dim]+=1<<(parent->mag-1);
 	}
-	int* write = target->corner;
-	write[0] = (idx < 4)?c[0]:sc[0];
-	write[1] = (idx < 2 || (idx >= 4 && idx < 6))?c[1]:sc[1];
-	write[2] = (idx%2 == 0)?c[2]:sc[2];
+	target[0] = (idx < 4)?c[0]:sc[0];
+	target[1] = (idx < 2 || (idx >= 4 && idx < 6))?c[1]:sc[1];
+	target[2] = (idx%2 == 0)?c[2]:sc[2];
 }
 
 int cubeExists(model* target, oct* currentCube){

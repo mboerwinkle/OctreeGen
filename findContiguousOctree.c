@@ -72,7 +72,6 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 	f->mag = t->mag;
 	memset(f->child, 0, 8*sizeof(oct*));
 	enqueueAndFrontier(f, x, y, z, 0, 0);
-	long int totalSize = 0;
 	//frontier expansion loop
 	while(fDequeue != NULL){//while there are still unexplored frontiers
 		int fx, fy, fz, mag, dir;
@@ -161,6 +160,5 @@ oct* findContiguousOctree(oct* t, int x, int y, int z){
 		}
 	}
 	freeOctree(f);
-	printf("contiguous found a volume of %ld\n", totalSize);
 	return ret;
 }

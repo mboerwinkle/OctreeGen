@@ -5,7 +5,7 @@
 #include "octreeOps.h"
 
 extern int cubeTriangleIntersect(double* center, double sideLen, facet triangle);
-extern void getCubeCorner(int idx, oct* parent, oct* target);
+//extern void getCubeCorner(int idx, oct* parent, oct* target);//in octreeOps.h
 oct* newOct = NULL;
 void addTriangle(oct* t, facet* tri, double res){//very similar to recurseCube. Just a little different (Operates on a single triangle at a time, instead of the entire group of triangles
 	int fullChildCount = 0;
@@ -21,7 +21,7 @@ void addTriangle(oct* t, facet* tri, double res){//very similar to recurseCube. 
 				newOct->full = 0;
 				memset(newOct->child, 0, 8*sizeof(oct*));
 			}
-			getCubeCorner(cIdx, t, newOct);
+			getCubeCorner(cIdx, t, newOct->corner);
 			newOct->mag = t->mag-1;
 			t->child[cIdx] = newOct;
 		}

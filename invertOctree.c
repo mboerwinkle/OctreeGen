@@ -17,7 +17,7 @@ oct* invertOctree(oct* t){//duplicates all non-full cubes. Replaces nulls with f
 			ret->child[cIdx]->mag = ret->mag-1;
 			ret->child[cIdx]->full = 1;
 			memset(ret->child[cIdx]->child, 0, 8*sizeof(oct*));
-			getCubeCorner(cIdx, ret, ret->child[cIdx]);
+			getCubeCorner(cIdx, ret, ret->child[cIdx]->corner);
 		}else{
 			ret->child[cIdx] = invertOctree(t->child[cIdx]);
 		}

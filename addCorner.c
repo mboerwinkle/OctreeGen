@@ -21,7 +21,7 @@ void addCorner(oct* t, int x, int y, int z, int mag){
 		t->child[cIdx]->mag = t->mag-1;
 		t->child[cIdx]->full = 0;
 		memset(t->child[cIdx]->child, 0, 8*sizeof(oct*));
-		getCubeCorner(cIdx, t, t->child[cIdx]);
+		getCubeCorner(cIdx, t, t->child[cIdx]->corner);
 	}
 	//recurse
 	int sideLen = 1<<(t->mag-1);//FIXME code duplication

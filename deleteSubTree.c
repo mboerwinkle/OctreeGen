@@ -25,7 +25,7 @@ void deleteSubTree(oct* t, int x, int y, int z, int mag){
 			t->child[c]->mag = t->mag-1;
 			t->child[c]->full = 1;
 			memset(t->child[c]->child, 0, 8*sizeof(oct*));
-			getCubeCorner(c, t, t->child[c]);
+			getCubeCorner(c, t, t->child[c]->corner);
 		}
 	}
 	int cIdx = identifyCorner(t, x, y, z);
