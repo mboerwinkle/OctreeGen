@@ -1,6 +1,9 @@
 # STL Files
 *.stl
 *.STL
+# Octrees
+*.nhc3
+*.NHC3
 
 # Prerequisites
 *.d
