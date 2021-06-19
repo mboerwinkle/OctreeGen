@@ -13,7 +13,7 @@ oct* createEmptyOct(unsigned short magnitude){
 	ret->tusage = 0;
 	enableIndex(100, ret);
 	subtree originSubtree = rootSubtree(ret);
-	setStatus(&originSubtree, 'P');
+	setStatus(&originSubtree, 'P', 'E');
 	return ret;
 }
 oct* duplicateOctree(oct* t){
@@ -141,19 +141,20 @@ void clearSubtree(subtree* target){
 	}
 }
 
-void setStatus(subtree* target, char status){
+void setStatus(subtree* target, char status, char cstatus){
 	assert(!(status == 'P' && target->mag == 0));
 	if(target->offset < target->origin->tusage){
 		char oldstatus = getStatus(target);
-		if(oldstatus == status) return;
+		assert(oldstatus != status);
 		if(oldstatus == 'P'){
 			clearSubtree(target);
 		}
 	}
 	setAtIndex(target->offset, target->origin, status);
 	if(status == 'P'){
+		assert(cstatus == 'E' || cstatus == 'F');
 		for(int idx = 0; idx < TWOPOWDIM; idx++){
-			insertAtIndex(target->offset+1, target->origin, 'E');
+			insertAtIndex(target->offset+1, target->origin, cstatus);
 		}
 	}
 }
@@ -188,7 +189,20 @@ subtree childSubtree(subtree* target, char cidx){
 		.mag = target->mag-1
 	};
 }
-
+subtree siblingSubtree(subtree* target, char tcidx){
+	assert(tcidx >= 0 && tcidx < 7);
+	char* data = &(target->origin->t[target->offset]);
+	for(unsigned long int remainingsteps = 1; remainingsteps; remainingsteps--){
+		if(*data == 'P') remainingsteps += TWOPOWDIM;
+		data++;
+	}
+	return (subtree) {
+		.origin = target->origin,
+		.offset = data - target->origin->t,
+		.corner = getCubeCorner(tcidx+1, target->mag+1, getParentCorner(tcidx, target->mag, target->corner)),
+		.mag = target->mag
+	};
+}
 void deleteCorner(oct* t, pt loc, unsigned short mag){
 	subtree curr = rootSubtree(t);
 	while(curr.mag != mag){
@@ -197,20 +211,26 @@ void deleteCorner(oct* t, pt loc, unsigned short mag){
 		if(status == 'E') return;
 		//we need to subdivide it
 		if(status == 'F'){
-			setStatus(&curr, 'P');
-			//and set all children to full
-			for(int cidx = 0; cidx < TWOPOWDIM; cidx++){
-				subtree child = childSubtree(&curr, cidx);
-				setStatus(&child, 'F');
-			}
+			setStatus(&curr, 'P', 'F');
 		}
 		curr = childSubtree(&curr, identifyCorner(&curr, loc));
 	}
-	setStatus(&curr, 'E');
+	setStatus(&curr, 'E', 0);
+}
+pt getParentCorner(char cidx, unsigned short cmag, pt ccorner){
+	long int sideLen = sidelen(cmag);
+	return (pt){.l = {
+		ccorner.l[0]-((cidx < 4)?0:sideLen),
+		ccorner.l[1]-((cidx < 2 || (cidx >= 4 && cidx < 6))?0:sideLen),
+		ccorner.l[2]-((cidx%2 == 0)?0:sideLen)
+	}};
 }
 pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner){
 	long int sidelen2 = sidelen(pmag-1);
-	pt pcenter = {.l = {pcorner.l[0]+sidelen2, pcorner.l[1]+sidelen2, pcorner.l[2]+sidelen2}};
-	return (pt){.l = {(cidx < 4)?pcorner.l[0]:pcenter.l[0] , (cidx < 2 || (cidx >= 4 && cidx < 6))?pcorner.l[1]:pcenter.l[1] , (cidx%2 == 0)?pcorner.l[2]:pcenter.l[2]}};
+	return (pt){.l = {
+		pcorner.l[0]+((cidx < 4)?0:sidelen2),
+		pcorner.l[1]+((cidx < 2 || (cidx >= 4 && cidx < 6))?0:sidelen2),
+		pcorner.l[2]+((cidx%2 == 0)?0:sidelen2)
+	}};
 }
 

@@ -5,13 +5,14 @@
 #include "octreeOps.h"
 
 extern int cubeTriangleIntersect(double* center, double sideLen, facet triangle);
-void addTriangle(subtree* t, facet* tri, double res){
+int addTriangle(subtree* t, facet* tri, double res){
 	int fullChildCount = 0;
-	subtree child;
+	subtree child = childSubtree(t, 0);
 	for(int cIdx = 0; cIdx < 8; cIdx++){
-		child = childSubtree(t, cIdx);
+		if(cIdx > 0) child = siblingSubtree(&child, cIdx-1);
+		char cstatus = getStatus(&child);
 		//if this child is already full, then it doesn't matter if it intersects or not.
-		if(getStatus(&child) == 'F'){
+		if(cstatus == 'F'){
 			fullChildCount++;
 			continue;
 		}
@@ -23,15 +24,19 @@ void addTriangle(subtree* t, facet* tri, double res){
 		double sideLen = res*(double)sidelen(child.mag);
 		if(cubeTriangleIntersect(center, sideLen, *tri)){
 			if(child.mag != 0){
-				setStatus(&child, 'P');
-				addTriangle(&child, tri, res);
+				if(cstatus == 'E') setStatus(&child, 'P', 'E');
+				if(addTriangle(&child, tri, res)){
+					fullChildCount++;
+				}
 			}else{
-				setStatus(&child, 'F');
+				setStatus(&child, 'F', 0);
 				fullChildCount++;
 			}
 		}
 	}
 	if(fullChildCount == 8){
-		setStatus(t, 'F');
+		setStatus(t, 'F', 0);
+		return 1;
 	}
+	return 0;
 }

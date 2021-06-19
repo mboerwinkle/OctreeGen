@@ -11,11 +11,11 @@ extern oct* expandOctree(oct* t);
 extern char cornerExists(oct* t, pt corner, int mag, int* foundMagnitude, pt* foundCorner);
 //adds a lowest-level voxel to the octree at the specified location
 extern void addCorner(oct* t, pt corner, int mag);
-
 //given a point inside of a cube, identifies which child it lies in
 extern int identifyCorner(subtree* parent, pt internal);
+
 //adds all of the lowest level voxels that intersect the given facet to the octree
-extern void addTriangle(subtree* t, facet* tri, double res);
+extern int addTriangle(subtree* t, facet* tri, double res);
 //prints out statistics about the tree
 extern void printTreeStats(oct* t);
 extern void writeStlOutput(FILE* output, oct* tree);

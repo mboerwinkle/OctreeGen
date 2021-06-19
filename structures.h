@@ -55,14 +55,16 @@ extern char getAtIndex(unsigned long int offset, oct* target);
 extern void setAtIndex(unsigned long int offset, oct* target, char value);
 extern void insertAtIndex(unsigned long int offset, oct* target, char val);
 extern void deleteAtIndex(unsigned long int offset, oct* target);
-pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner);
+extern pt getParentCorner(char cidx, unsigned short cmag, pt ccorner);
+extern pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner);
 
 extern char getStatus(subtree* target);
-extern void setStatus(subtree* target, char status);
+extern void setStatus(subtree* target, char status, char cstatus);
 extern void printSubtreeStatus(subtree* target);
 extern subtree rootSubtree(oct* target);
 extern subtree cornerSubtree(oct* target, pt corner, unsigned short mag);
 extern subtree childSubtree(subtree* target, char cidx);
+extern subtree siblingSubtree(subtree* target, char tcidx);
 extern void deleteCorner(oct* t, pt loc, unsigned short mag);
 extern void clearSubtree(subtree* target);
 #endif

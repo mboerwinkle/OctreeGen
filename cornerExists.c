@@ -52,10 +52,10 @@ void addCornerRec(subtree* t, pt loc, int mag){
 				}
 			}
 		#endif
-		setStatus(t, 'F');
+		setStatus(t, 'F', 0);
 		return;
 	}
-	if(tstatus == 'E') setStatus(t, 'P');
+	if(tstatus == 'E') setStatus(t, 'P', 'E');
 	int cIdx = identifyCorner(t, loc);
 	subtree child = childSubtree(t, cIdx);
 	addCornerRec(&child, loc, mag);
