@@ -1,80 +1,81 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "structures.h"
 #include "octreeOps.h"
 
 static int xoff[26] = {-1,-1,-1,-1,-1,-1,-1,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 static int yoff[26] = {-1,-1,-1, 0, 0, 0, 1, 1, 1,-1,-1,-1, 0, 0, 1, 1, 1,-1,-1,-1, 0, 0, 0, 1, 1, 1};
 static int zoff[26] = {-1, 0, 1,-1, 0, 1,-1, 0, 1,-1, 0, 1,-1, 1,-1, 0, 1,-1, 0, 1,-1, 0, 1,-1, 0, 1};
+static int* off[3] = {xoff, yoff, zoff};
 //all tests occur against the original (ref), with t being altered.
-void expandOctreeRec(oct* t, oct* ref){
-	int sidelen = 1<<(t->mag);
-	int csidelen = 1<<(t->mag-1);
+void expandOctreeRec(subtree* t, oct* ref){
+	if(t->mag < 1) return;
+	long int sideLen = sidelen(t->mag);
+	long int csideLen = sidelen(t->mag-1);
+	char status = getStatus(t);
 	//if it is full, check the surrounding cubes. If any are not full, make this partial with full children.
-	if(t->full && t->mag >= 2){
-		int* c = t->corner;
+	if(status == 'F'){
 		char partialize = 0;
 		for(int oidx = 0; oidx < 26; oidx++){
-			int tx = c[0]+xoff[oidx]*sidelen;
-			int ty = c[1]+yoff[oidx]*sidelen;
-			int tz = c[2]+zoff[oidx]*sidelen;
+			pt test = t->corner;
+			for(int dim = 0; dim < DIM; dim++){
+				test.l[dim] += off[dim][oidx]*sideLen;
+			}
 			//if a neighbor isn't full
-			if(2 != cornerExists(ref, tx, ty, tz, t->mag, NULL)){
+			if(2 != cornerExists(ref, test, t->mag, NULL, NULL)){
 				partialize = 1;
 				break;
 			}
 		}
+		assert(2 == cornerExists(ref, t->corner, t->mag, NULL, NULL));
 		//make this partial, and add 8 full children
 		if(partialize){
-			t->full = 0;
+			setStatus(t, 'P');
 			for(int cidx = 0; cidx < 8; cidx++){
-				oct* newc = malloc(sizeof(oct));
-				newc->mag = t->mag-1;
-				newc->full = 1;
-				getCubeCorner(cidx, t, newc->corner);
-				memset(newc->child, 0, 8*sizeof(oct*));
-				t->child[cidx] = newc;
+				subtree child = childSubtree(t, cidx);
+				setStatus(&child, 'F');
 			}
 		}
 	}
-	//cannot be elif because above if statement may remove t's full status
-	if(!t->full){
-		oct** c = t->child;
+	//above if statement may remove t's full status, so we need to recheck
+	status = getStatus(t);
+	if(status == 'P'){
 		for(int cidx = 0; cidx < 8; cidx++){
+			subtree child = childSubtree(t, cidx);
+			char cstatus = getStatus(&child);
 			//if this child is empty, check the surrounding cubes. If any are not empty, make this partial.
-			if(c[cidx] == NULL && t->mag-1 >= 2){
-				int ccorner[3];
-				getCubeCorner(cidx, t, ccorner);
+			if(cstatus == 'E' && t->mag-1 >= 1){
+				//pt ccorner = getCubeCorner(cidx, t->mag, t->corner);
 				char partialize = 0;
 				for(int oidx = 0; oidx < 26; oidx++){
-					int cl[3] = {ccorner[0]+xoff[oidx]*csidelen, ccorner[1]+yoff[oidx]*csidelen, ccorner[2]+zoff[oidx]*csidelen};
+					pt cl = child.corner;
+					for(int dim = 0; dim < 3; dim++){
+						cl.l[dim] += off[dim][oidx]*csideLen;
+					}
 					//if a neighbor of this child isn't empty (0 or -1)
-					if(0 < cornerExists(ref, cl[0], cl[1], cl[2], t->mag-1, NULL)){
+					if(0 < cornerExists(ref, cl, t->mag-1, NULL, NULL)){
 						partialize = 1;
 						break;
 					}
 				}
 				//put an 'empty' partial cube here (partial but with no children). This only makes sense in the context of octree expansion.
 				if(partialize){
-					oct* newc = malloc(sizeof(oct));
-					newc->mag = t->mag-1;
-					newc->full = 0;
-					getCubeCorner(cidx, t, newc->corner);
-					memset(newc->child, 0, 8*sizeof(oct*));
-					c[cidx] = newc;
+					setStatus(&child, 'P');
 				}
 			}
-			if(c[cidx]){
-				expandOctreeRec(c[cidx], ref);
+			cstatus = getStatus(&child);
+			if(cstatus == 'P' || cstatus == 'F'){
+				expandOctreeRec(&child, ref);
 			}
 		}
 	}
 }
 oct* expandOctree(oct* t){
 	fprintf(stderr, "called expandOctree\n");
-	if(t == NULL) return NULL;
 	oct* ret = duplicateOctree(t);
-	expandOctreeRec(ret, t);
+	subtree retroot = rootSubtree(ret);
+	expandOctreeRec(&retroot, t);
 	return ret;
 }

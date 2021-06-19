@@ -7,13 +7,8 @@
 double resolution = 1;
 char expandflag = 0;
 int magnitude = 0;//magnitude 0 is a single cube centered on the origin. This never exists because we require a 1 block buffer around all objects, which cannot exist with a single block (unless the model is empty - autocheck FIXME)
-extern oct* newOct;//used in recurseCube
-extern void recurseCube(model* target, oct* currentCube);
-extern int cubeExists(model* target, oct* currentCube);
 
-model generateOctree(model target, double modelSize){//based on cubealgo.txt
-	//initialize values
-	target.myTree = NULL;
+oct* generateOctree(model target, double modelSize){
 	float* min = target.min;
 	float* max = target.max;
 	for(int dim = 0; dim < 3; dim++){
@@ -70,29 +65,15 @@ model generateOctree(model target, double modelSize){//based on cubealgo.txt
 	long int volume = sideLength*sideLength*sideLength;
 	fprintf(stderr, "sideLength: %d\nvolume: %ld\n", sideLength, volume);
 	//find boundary
-	target.myTree = malloc(sizeof(oct));
-	target.myTree->mag = magnitude;
-	target.myTree->full = 0;
-	memset(target.myTree->child, 0, 8*sizeof(oct*));
-	for(int dim = 0; dim < 3; dim++){
-		target.myTree->corner[dim] = -sideLength/2;
-	}
-	fprintf(stderr, "corner %d %d %d\n", target.myTree->corner[0], target.myTree->corner[1], target.myTree->corner[2]);  
+	oct* ret = createEmptyOct(magnitude);
+	subtree originSubtree = rootSubtree(ret);
 	int writeFrequency = target.facetCount/10;
 	for(int tIdx = 0; tIdx < target.facetCount; tIdx++){
 		if(writeFrequency == 0 || tIdx%writeFrequency == 0){
 			fprintf(stderr, "facet %d of %d\n", tIdx, target.facetCount);
 		}
-		addTriangle(target.myTree, &(target.facets[tIdx]), resolution);
+		addTriangle(&originSubtree, &(target.facets[tIdx]), resolution);
 	}
-	free(newOct);
-/*	if(cubeExists(&target, target.myTree)){
-		recurseCube(&target, target.myTree);
-		free(newOct);
-	}else{
-		free(target.myTree);
-		target.myTree = NULL;
-	}*/
 	fprintf(stderr, "Done finding border\n");
-	return target;
+	return ret;
 }

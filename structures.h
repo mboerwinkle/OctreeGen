@@ -1,6 +1,7 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 #include <inttypes.h>
+
 extern double resolution;
 extern int magnitude;
 extern char expandflag;
@@ -12,21 +13,56 @@ typedef struct facet{
 	float p3[3];
 	uint16_t attr;
 }__attribute__((packed)) facet;
-
-typedef struct oct{
-	int mag;//side length of voxel is (RESOLUTION*2^mag)
-	int full;//if it exists, it is either partial or full.
-	int corner[3];
-	struct oct* child[8];
-}oct;
-extern oct* getChild(oct* parent, int x, int y, int z);//x, y, and z, are 1 or -1 to specify which corner.
-
 typedef struct model{
 	facet* facets;
 	uint32_t facetCount;
 	float min[3];
 	float max[3];
-	oct* myTree;
 }model;
 
+
+
+#define DIM 3
+#define TWOPOWDIM (1 << DIM)
+
+typedef struct pt{
+	long int l[DIM];
+}pt;
+typedef struct oct{
+	unsigned long int tlen;
+	unsigned long int tusage;
+	char* t;
+	//even char is way overkill
+	unsigned short mag;
+}oct;
+typedef struct subtree{
+	oct* origin;
+	//index in origin->t
+	unsigned long int offset;
+	pt corner;
+	unsigned short mag;
+}subtree;
+
+
+extern oct* createEmptyOct(unsigned short magnitude);
+extern oct* duplicateOctree(oct* t);
+extern oct* invertOctree(oct* t);
+extern void freeOctree(oct* t);
+extern void validateOctree(oct* t);
+extern long int sidelen(unsigned short mag);
+extern void enableIndex(unsigned long int offset, oct* target);
+extern char getAtIndex(unsigned long int offset, oct* target);
+extern void setAtIndex(unsigned long int offset, oct* target, char value);
+extern void insertAtIndex(unsigned long int offset, oct* target, char val);
+extern void deleteAtIndex(unsigned long int offset, oct* target);
+pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner);
+
+extern char getStatus(subtree* target);
+extern void setStatus(subtree* target, char status);
+extern void printSubtreeStatus(subtree* target);
+extern subtree rootSubtree(oct* target);
+extern subtree cornerSubtree(oct* target, pt corner, unsigned short mag);
+extern subtree childSubtree(subtree* target, char cidx);
+extern void deleteCorner(oct* t, pt loc, unsigned short mag);
+extern void clearSubtree(subtree* target);
 #endif

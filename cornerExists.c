@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "structures.h"
 #include "octreeOps.h"
 //-1 invalid
@@ -8,61 +9,67 @@
 //2 exists fully at the specified magnitude
 //
 //foundMagnitude undefined unless return value is 2 (full)
-int cornerExists(oct* t, int x, int y, int z, int mag, int *foundMagnitude){
-	if(t == NULL){
-		return 0;
+//foundCorner is populated in the same conditions as foundMagnitude with the corner of whatever cube includes loc
+char cornerExistsRec(subtree* t, pt loc, int mag, int* foundMagnitude, pt* foundCorner){
+	long int sideLen = sidelen(t->mag);
+	for(int dim = 0; dim < DIM; dim++){
+		if(t->corner.l[dim] > loc.l[dim] || t->corner.l[dim]+sideLen <= loc.l[dim]){
+			return -1;
+		}
 	}
-	int sideLen = 1<<(t->mag);
-	if(x < 0 || y < 0 || z < 0 || x >= sideLen || y >= sideLen || z >= sideLen){
-		return -1;//invalid
-	}
-	if(t->full){
+	char status = getStatus(t);
+	if(status == 'F'){
 		if(foundMagnitude != NULL) *foundMagnitude = t->mag;
+		if(foundCorner != NULL) *foundCorner = t->corner;
 		return 2;
-	}
-	if(t->mag == mag){
+	}else if(status == 'E'){
+		return 0;
+	}else if(t->mag == mag){
+		#ifndef NDEBUG
+			for(int idx = 0; idx < DIM; idx++){
+				assert(loc.l[idx] == t->corner.l[idx]);
+			}
+		#endif
 		return 1;
 	}
-	int cIdx = identifyCorner(t, x, y, z);
-	//this little chunk of code is the translation to child local coordinates
-	sideLen /= 2;
-	if(x >= sideLen) x-= sideLen;
-	if(y >= sideLen) y-= sideLen;
-	if(z >= sideLen) z-= sideLen;
-	return cornerExists(t->child[cIdx], x, y, z, mag, foundMagnitude);//FIXME use turnaries?
+	subtree child = childSubtree(t, identifyCorner(t, loc));
+	return cornerExistsRec(&child, loc, mag, foundMagnitude, foundCorner);
+} 
+char cornerExists(oct* t, pt corner, int mag, int *foundMagnitude, pt* foundCorner){
+	subtree root = rootSubtree(t);
+	return cornerExistsRec(&root, corner, mag, foundMagnitude, foundCorner);
 }
-int identifyCorner(oct* t, int x, int y, int z){
-	int edgeLen = 1<<(t->mag-1);
-	x/=edgeLen;
-	y/=edgeLen;
-	z/=edgeLen;
-	if(x){
-		if(y){
-			if(z){
-				return 7;
-			}else{
-				return 6;
+
+void addCornerRec(subtree* t, pt loc, int mag){
+	char tstatus = getStatus(t);
+	if(tstatus == 'F') return;
+	if(t->mag == mag){
+		#ifndef NDEBUG
+			for(int idx = 0; idx < DIM; idx++){
+				if(loc.l[idx] != t->corner.l[idx]){
+					fprintf(stderr, "Assertion Failed: mag %hd loc (%ld %ld %ld) is not corner (%ld %ld %ld)\n", mag, loc.l[0], loc.l[1], loc.l[2], t->corner.l[0], t->corner.l[1], t->corner.l[2]);
+					break;
+				}
 			}
-		}else{
-			if(z){
-				return 5;
-			}else{
-				return 4;
-			}
-		}
-	}else{
-		if(y){
-			if(z){
-				return 3;
-			}else{
-				return 2;
-			}
-		}else{
-			if(z){
-				return 1;
-			}else{
-				return 0;
-			}
-		}
+		#endif
+		setStatus(t, 'F');
+		return;
 	}
+	if(tstatus == 'E') setStatus(t, 'P');
+	int cIdx = identifyCorner(t, loc);
+	subtree child = childSubtree(t, cIdx);
+	addCornerRec(&child, loc, mag);
+}
+void addCorner(oct* t, pt corner, int mag){
+	subtree root = rootSubtree(t);
+	addCornerRec(&root, corner, mag);
+}
+
+int identifyCorner(subtree* parent, pt internal){
+	unsigned long int sideLen2 = sidelen(parent->mag-1);
+	int ret = 0;
+	for(int dim = 0; dim < DIM; dim++){
+		ret += ((internal.l[dim]-parent->corner.l[dim])/sideLen2 > 0)?(1<<(DIM-dim-1)):0;
+	}
+	return ret;
 }

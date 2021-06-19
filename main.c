@@ -21,9 +21,7 @@ char chrlwr(char i){
 int main(int argc, char** argv){
 	FILE *inputFile = NULL, *outputFile = NULL;
 	float stldimsize = -1.0;
-	#ifndef NDEBUG
-		fprintf(stderr, "oct size: %ld bytes\n", sizeof(oct));
-	#endif
+	fprintf(stderr, "oct size: %ld bytes\n", sizeof(oct));
 	static struct option long_options[] = {
 		{"help", no_argument, NULL, 'h'},
 		{"input", required_argument, NULL, 'i'},
