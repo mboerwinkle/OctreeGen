@@ -158,17 +158,6 @@ void setStatus(subtree* target, char status){
 	}
 }
 
-unsigned long int getSiblingOffset(unsigned long int offset, char* data){
-	unsigned long int remainingsteps = 1;
-	unsigned long int coffset = offset;
-	while(remainingsteps){
-		remainingsteps--;
-		if(data[coffset] == 'P') remainingsteps += TWOPOWDIM;
-		coffset++;
-	}
-	return coffset;
-}
-
 subtree rootSubtree(oct* target){
 	long int co = -sidelen(target->mag-1);
 	return (subtree) {
@@ -187,13 +176,14 @@ subtree cornerSubtree(oct* target, pt corner, unsigned short mag){
 }
 subtree childSubtree(subtree* target, char cidx){
 	assert(getStatus(target) == 'P' && cidx >= 0 && cidx < TWOPOWDIM);
-	unsigned long int childoffset = target->offset+1;
-	for(int idx = 0; idx < cidx; idx++){
-		childoffset = getSiblingOffset(childoffset, target->origin->t);
+	char* data = &(target->origin->t[target->offset+1]);
+	for(unsigned long int remainingsteps = cidx; remainingsteps; remainingsteps--){
+		if(*data == 'P') remainingsteps += TWOPOWDIM;
+		data++;
 	}
 	return (subtree) {
 		.origin = target->origin,
-		.offset = childoffset,
+		.offset = data - target->origin->t,
 		.corner = getCubeCorner(cidx, target->mag, target->corner),
 		.mag = target->mag-1
 	};
@@ -216,7 +206,6 @@ void deleteCorner(oct* t, pt loc, unsigned short mag){
 		}
 		curr = childSubtree(&curr, identifyCorner(&curr, loc));
 	}
-	assert(curr.mag == mag);
 	setStatus(&curr, 'E');
 }
 pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner){

@@ -4,7 +4,8 @@
 # Octrees
 *.nhc3
 *.NHC3
-
+# Perf Data
+perf.data*
 # Prerequisites
 *.d
 
