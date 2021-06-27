@@ -65,6 +65,7 @@ extern subtree rootSubtree(oct* target);
 extern subtree cornerSubtree(oct* target, pt corner, unsigned short mag);
 extern subtree childSubtree(subtree* target, char cidx);
 extern subtree siblingSubtree(subtree* target, char tcidx);
-extern void deleteCorner(oct* t, pt loc, unsigned short mag);
+extern subtree marginParentSubtree(subtree* target, pt corner, unsigned short mag);
+extern void deleteCorner(subtree* t, pt loc, unsigned short mag);
 extern void clearSubtree(subtree* target);
 #endif

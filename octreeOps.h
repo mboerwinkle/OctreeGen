@@ -9,8 +9,10 @@ extern oct* expandOctree(oct* t);
 // #cornerExists.c
 //returns 1 if that corner exists, or 0 if it doesn't
 extern char cornerExists(oct* t, pt corner, int mag, int* foundMagnitude, pt* foundCorner);
+extern char cornerExistsRec(subtree* t, pt corner, int mag, int* foundMagnitude, pt* foundCorner);
 //adds a lowest-level voxel to the octree at the specified location
 extern void addCorner(oct* t, pt corner, int mag);
+extern void addCornerRec(subtree* t, pt corner, int mag);
 //given a point inside of a cube, identifies which child it lies in
 extern int identifyCorner(subtree* parent, pt internal);
 

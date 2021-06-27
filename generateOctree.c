@@ -55,7 +55,7 @@ oct* generateOctree(model target, double modelSize){
 	}
 	if(expandflag){
 		fprintf(stderr, "increasing magnitude for safe expansion\n");
-		magnitude += 2;
+		magnitude += 1;
 	}
 	fprintf(stderr, "magnitude: %d\n", magnitude);
 	int sideLength = 1<<magnitude;

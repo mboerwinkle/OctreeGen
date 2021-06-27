@@ -203,19 +203,36 @@ subtree siblingSubtree(subtree* target, char tcidx){
 		.mag = target->mag
 	};
 }
-void deleteCorner(oct* t, pt loc, unsigned short mag){
-	subtree curr = rootSubtree(t);
-	while(curr.mag != mag){
-		char status = getStatus(&curr);
+subtree marginParentSubtree(subtree* target, pt corner, unsigned short mag){
+	subtree ret = *target;
+	long int tsidelen = sidelen(mag);
+	while(getStatus(&ret) == 'P' && ret.mag > mag){
+		int nextcidx = identifyCorner(&ret, corner);
+		pt ccorner = getCubeCorner(nextcidx, ret.mag, ret.corner);
+		long int csidelen = sidelen(ret.mag-1);
+		for(int dim = 0; dim < DIM; dim++){
+			if(corner.l[dim]-tsidelen < ccorner.l[dim] || corner.l[dim]+2*tsidelen >= ccorner.l[dim]+csidelen){
+				return ret;
+			}
+		}
+		ret = childSubtree(&ret, nextcidx);
+	}
+	return ret;
+}
+void deleteCorner(subtree* t, pt loc, unsigned short mag){
+	subtree curr;
+	while(t->mag != mag){
+		char status = getStatus(t);
 		//it already doesn't exist
 		if(status == 'E') return;
 		//we need to subdivide it
 		if(status == 'F'){
-			setStatus(&curr, 'P', 'F');
+			setStatus(t, 'P', 'F');
 		}
-		curr = childSubtree(&curr, identifyCorner(&curr, loc));
+		curr = childSubtree(t, identifyCorner(t, loc));
+		t = &curr;
 	}
-	setStatus(&curr, 'E', 0);
+	setStatus(t, 'E', 0);
 }
 pt getParentCorner(char cidx, unsigned short cmag, pt ccorner){
 	long int sideLen = sidelen(cmag);

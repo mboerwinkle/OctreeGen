@@ -10,7 +10,7 @@ static int yoff[26] = {-1,-1,-1, 0, 0, 0, 1, 1, 1,-1,-1,-1, 0, 0, 1, 1, 1,-1,-1,
 static int zoff[26] = {-1, 0, 1,-1, 0, 1,-1, 0, 1,-1, 0, 1,-1, 1,-1, 0, 1,-1, 0, 1,-1, 0, 1,-1, 0, 1};
 static int* off[3] = {xoff, yoff, zoff};
 //all tests occur against the original (ref), with t being altered.
-void expandOctreeRec(subtree* t, oct* ref){
+void expandOctreeRec(subtree* t, subtree* ref){
 	if(t->mag < 1) return;
 	long int sideLen = sidelen(t->mag);
 	long int csideLen = sidelen(t->mag-1);
@@ -24,12 +24,12 @@ void expandOctreeRec(subtree* t, oct* ref){
 				test.l[dim] += off[dim][oidx]*sideLen;
 			}
 			//if a neighbor isn't full
-			if(2 != cornerExists(ref, test, t->mag, NULL, NULL)){
+			if(2 != cornerExistsRec(ref, test, t->mag, NULL, NULL)){
 				partialize = 1;
 				break;
 			}
 		}
-		assert(2 == cornerExists(ref, t->corner, t->mag, NULL, NULL));
+		assert(2 == cornerExistsRec(ref, t->corner, t->mag, NULL, NULL));
 		//make this partial, and add 8 full children
 		if(partialize){
 			setStatus(t, 'P', 'F');
@@ -51,7 +51,7 @@ void expandOctreeRec(subtree* t, oct* ref){
 						cl.l[dim] += off[dim][oidx]*csideLen;
 					}
 					//if a neighbor of this child isn't empty (0 or -1)
-					if(0 < cornerExists(ref, cl, t->mag-1, NULL, NULL)){
+					if(0 < cornerExistsRec(ref, cl, t->mag-1, NULL, NULL)){
 						partialize = 1;
 						break;
 					}
@@ -63,7 +63,8 @@ void expandOctreeRec(subtree* t, oct* ref){
 			}
 			cstatus = getStatus(&child);
 			if(cstatus == 'P' || cstatus == 'F'){
-				expandOctreeRec(&child, ref);
+				subtree refMarginParent = marginParentSubtree(ref, child.corner, child.mag);
+				expandOctreeRec(&child, &refMarginParent);
 			}
 		}
 	}
@@ -72,6 +73,7 @@ oct* expandOctree(oct* t){
 	fprintf(stderr, "called expandOctree\n");
 	oct* ret = duplicateOctree(t);
 	subtree retroot = rootSubtree(ret);
-	expandOctreeRec(&retroot, t);
+	subtree troot = rootSubtree(t);
+	expandOctreeRec(&retroot, &troot);
 	return ret;
 }
