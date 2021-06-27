@@ -41,9 +41,9 @@ char cornerExists(oct* t, pt corner, int mag, int *foundMagnitude, pt* foundCorn
 	return cornerExistsRec(&root, corner, mag, foundMagnitude, foundCorner);
 }
 
-void addCornerRec(subtree* t, pt loc, int mag){
+subtree addCornerRec(subtree* t, pt loc, int mag){
 	char tstatus = getStatus(t);
-	if(tstatus == 'F') return;
+	if(tstatus == 'F') return *t;
 	if(t->mag == mag){
 		#ifndef NDEBUG
 			for(int idx = 0; idx < DIM; idx++){
@@ -54,12 +54,12 @@ void addCornerRec(subtree* t, pt loc, int mag){
 			}
 		#endif
 		setStatus(t, 'F', 0);
-		return;
+		return *t;
 	}
 	if(tstatus == 'E') setStatus(t, 'P', 'E');
 	int cIdx = identifyCorner(t, loc);
 	subtree child = childSubtree(t, cIdx);
-	addCornerRec(&child, loc, mag);
+	return addCornerRec(&child, loc, mag);
 }
 void addCorner(oct* t, pt corner, int mag){
 	subtree root = rootSubtree(t);

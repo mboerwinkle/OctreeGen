@@ -110,6 +110,9 @@ oct* findContiguousOctree(oct* t, pt corner){
 			}
 			//evens->1, odds->0
 			int primaryside = 1^(dir%2);
+			//we can compress the margin parent a bit closer
+			fmarginParent = addCornerRec(&fmarginParent, loc, mag);
+			setStatus(&fmarginParent, 'P', 'E');
 			for(int idx = 0; idx < (1<<(DIM-1)); idx++){
 				pt alteredpt = loc;
 				alteredpt.l[primaryaxis] += primaryside*o;
