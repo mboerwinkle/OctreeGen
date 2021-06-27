@@ -13,8 +13,6 @@ extern char cornerExistsRec(subtree* t, pt corner, int mag, int* foundMagnitude,
 //adds a lowest-level voxel to the octree at the specified location
 extern void addCorner(oct* t, pt corner, int mag);
 extern void addCornerRec(subtree* t, pt corner, int mag);
-//given a point inside of a cube, identifies which child it lies in
-extern int identifyCorner(subtree* parent, pt internal);
 
 //adds all of the lowest level voxels that intersect the given facet to the octree
 extern int addTriangle(subtree* t, facet* tri, double res);

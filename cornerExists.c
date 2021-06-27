@@ -12,6 +12,7 @@
 //foundCorner is populated in the same conditions as foundMagnitude with the corner of whatever cube includes loc
 char cornerExistsRec(subtree* t, pt loc, int mag, int* foundMagnitude, pt* foundCorner){
 	long int sideLen = sidelen(t->mag);
+	//FIXME  move this outside of the recursive case and change to assertion
 	for(int dim = 0; dim < DIM; dim++){
 		if(t->corner.l[dim] > loc.l[dim] || t->corner.l[dim]+sideLen <= loc.l[dim]){
 			return -1;
@@ -63,13 +64,4 @@ void addCornerRec(subtree* t, pt loc, int mag){
 void addCorner(oct* t, pt corner, int mag){
 	subtree root = rootSubtree(t);
 	addCornerRec(&root, corner, mag);
-}
-
-int identifyCorner(subtree* parent, pt internal){
-	unsigned long int sideLen2 = sidelen(parent->mag-1);
-	int ret = 0;
-	for(int dim = 0; dim < DIM; dim++){
-		ret += ((internal.l[dim]-parent->corner.l[dim])/sideLen2 > 0)?(1<<(DIM-dim-1)):0;
-	}
-	return ret;
 }

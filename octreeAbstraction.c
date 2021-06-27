@@ -250,4 +250,11 @@ pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner){
 		pcorner.l[2]+((cidx%2 == 0)?0:sidelen2)
 	}};
 }
-
+int identifyCorner(subtree* parent, pt internal){
+	unsigned long int sideLen2 = sidelen(parent->mag-1);
+	int ret = 0;
+	for(int dim = 0; dim < DIM; dim++){
+		ret += ((internal.l[dim]-parent->corner.l[dim])/sideLen2 > 0)?(1<<(DIM-dim-1)):0;
+	}
+	return ret;
+}

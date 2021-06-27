@@ -26,6 +26,18 @@ void enqueue(pt loc, unsigned short mag, char dir){
 	fEnqueue->dir = dir;
 	fEnqueue->next = NULL;
 }
+void prependenqueue(pt loc, unsigned short mag, char dir){
+	queueLen++;
+	fRef* prevDequeue = fDequeue;
+	fDequeue = malloc(sizeof(fRef));
+	if(fEnqueue == NULL){
+		fEnqueue = fDequeue;
+	}
+	fDequeue->loc = loc;
+	fDequeue->mag = mag;
+	fDequeue->dir = dir;
+	fDequeue->next = prevDequeue;
+}
 void dequeue(pt* loc, unsigned short *mag, char *dir){
 	queueLen--;
 	*loc = fDequeue->loc;
@@ -53,6 +65,7 @@ oct* findContiguousOctree(oct* t, pt corner){
 	//We store the frontier as an octree, since it is easily searchable, and easily editable. In addition, we keep a queue of locations for proper frontier action. Keep in mind that the frontier octree also includes all locations that have ever been part of the frontier. By the end, it will be identical to the returned octree, plus an outer shell.
 	oct* f = createEmptyOct(t->mag);
 	subtree froot = rootSubtree(f);
+	treechain* tchain = createTreechain(t); 
 	oct* ret = createEmptyOct(t->mag);
 	addCornerRec(&froot, corner, 0);
 	enqueue(corner, 0, 0);
@@ -65,7 +78,7 @@ oct* findContiguousOctree(oct* t, pt corner){
 		dequeue(&loc, &mag, &dir);
 		int foundMag;
 		pt foundCorner;
-		int cornerExistsRet = cornerExists(t, loc, mag, &foundMag, &foundCorner);
+		int cornerExistsRet = cornerExistsTC(tchain, loc, mag, &foundMag, &foundCorner);
 		//exists fully
 		if(cornerExistsRet == 2){
 			subtree fmarginParent = marginParentSubtree(&froot, foundCorner, foundMag);
@@ -96,7 +109,7 @@ oct* findContiguousOctree(oct* t, pt corner){
 				otheraxes[idx-1] = (primaryaxis+idx)%DIM;
 			}
 			//evens->1, odds->0
-			int primaryside = -(dir%2-1);
+			int primaryside = 1^(dir%2);
 			for(int idx = 0; idx < (1<<(DIM-1)); idx++){
 				pt alteredpt = loc;
 				alteredpt.l[primaryaxis] += primaryside*o;
@@ -104,10 +117,12 @@ oct* findContiguousOctree(oct* t, pt corner){
 					alteredpt.l[otheraxes[aidx]] += o*((idx/(aidx+1))%2);
 				}
 				addCornerRec(&fmarginParent, alteredpt, mag-1);
-				enqueue(alteredpt, mag-1, dir);
+				//prepend gives better locality for caching
+				prependenqueue(alteredpt, mag-1, dir);
 			}
 		}
 	}
+	freeTreechain(tchain);
 	freeOctree(f);
 	return ret;
 }

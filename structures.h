@@ -43,7 +43,6 @@ typedef struct subtree{
 	unsigned short mag;
 }subtree;
 
-
 extern oct* createEmptyOct(unsigned short magnitude);
 extern oct* duplicateOctree(oct* t);
 extern oct* invertOctree(oct* t);
@@ -57,6 +56,8 @@ extern void insertAtIndex(unsigned long int offset, oct* target, char val);
 extern void deleteAtIndex(unsigned long int offset, oct* target);
 extern pt getParentCorner(char cidx, unsigned short cmag, pt ccorner);
 extern pt getCubeCorner(char cidx, unsigned short pmag, pt pcorner);
+extern int identifyCorner(subtree* parent, pt internal);
+
 
 extern char getStatus(subtree* target);
 extern void setStatus(subtree* target, char status, char cstatus);
@@ -68,4 +69,15 @@ extern subtree siblingSubtree(subtree* target, char tcidx);
 extern subtree marginParentSubtree(subtree* target, pt corner, unsigned short mag);
 extern void deleteCorner(subtree* t, pt loc, unsigned short mag);
 extern void clearSubtree(subtree* target);
+
+
+typedef struct treechain{
+	subtree* t;
+	//minmag. Says how much of t is used
+	int mm;
+	int maxmag;
+}treechain;
+extern treechain* createTreechain(oct* t);
+extern void freeTreechain(treechain* t);
+extern char cornerExistsTC(treechain* t, pt loc, int mag, int* foundMagnitude, pt* foundCorner);
 #endif
