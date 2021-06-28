@@ -24,6 +24,7 @@ void printTreeStatsRec(subtree* t){
 		}
 	}
 }
+char prefixes[6] = {' ','K','M','G','T','P'};
 void printTreeStats(oct* t){
 	cubeCount = calloc(t->mag+1, sizeof(unsigned long int));
 	cubeVolume = 0;
@@ -31,10 +32,23 @@ void printTreeStats(oct* t){
 	printTreeStatsRec(&root);
 	long int rootsidelen = sidelen(root.mag);
 	unsigned long int totalVolume = rootsidelen*rootsidelen*rootsidelen;
-	fprintf(stderr, "CORNER AT: (%ld, %ld, %ld), CUBE VOLUME: %ld (%lf%%)\n", root.corner.l[0], root.corner.l[1], root.corner.l[2], cubeVolume, 100.0*(double)cubeVolume/(double)totalVolume);
 	fprintf(stderr, "CUBE BREAKDOWN\n");
 	for(int x = t->mag; x >= 0; x--){
 		fprintf(stderr, "%d: %ld\n", x, cubeCount[x]);
 	}
+	double size = t->tusage;
+	int prefixidx = 0;
+	while(size >= 1024.0){
+		size /= 1024.0;
+		prefixidx++;
+	}
+	fprintf(stderr,
+		"CORNER AT: (%ld, %ld, %ld), "
+		"CUBE VOLUME: %ld (%lf%%), "
+		"%lf %cBYTES\n",
+		root.corner.l[0], root.corner.l[1], root.corner.l[2],
+		cubeVolume, 100.0*(double)cubeVolume/(double)totalVolume,
+		size, prefixes[prefixidx]
+	);
 	free(cubeCount);
 }
