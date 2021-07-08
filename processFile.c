@@ -57,7 +57,7 @@ void processFile(FILE* inputFile, FILE* outputFile, double modelSize){
 	freeOctree(tree);
 }
 void writeRawOctree(FILE* output, oct* tree){
-	fputc('3', output);
+	fprintf(output, "NHC3_%04X_", tree->mag);
 	for(long unsigned int offset = 0; offset < tree->tusage; offset++){
 		fputc(tree->t[offset], output);
 	}
